@@ -2,7 +2,7 @@
 
 | Demo  |  Wiki |  Trello  |
 |:-----:|:-----:|:--------:|
-|[<img src="https://eecs441.eecs.umich.edu/img/admin/video.png">][demo_page]|[<img src="https://eecs441.eecs.umich.edu/img/admin/wiki.png">][https://github.com/hagglunr/EECS441-WolverineWildForce/wiki]|[<img src="https://eecs441.eecs.umich.edu/img/admin/trello.png">][process_page]|
+|[<img src="https://eecs441.eecs.umich.edu/img/admin/video.png">][demo_page]|[<img src="https://eecs441.eecs.umich.edu/img/admin/wiki.png">](https://github.com/hagglunr/EECS441-WolverineWildForce/wiki)|[<img src="https://eecs441.eecs.umich.edu/img/admin/trello.png">][process_page]|
 
 ![Elevator Pitch](/assets/title.png)
 ![Team](/assets/team.png)
