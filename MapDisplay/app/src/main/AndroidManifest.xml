@@ -10,8 +10,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MapDisplay">
         <activity
+            android:name=".DisplayActivity"
+            android:label="@string/display"
+            android:parentActivityName=".MainActivity" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
