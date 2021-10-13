@@ -9,6 +9,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        BuildingDirectoryMap = LinkedHashMap<String, Building>()
+        var tempBuilding = Building
+        BuildingDirectoryMap[tempBuilding.name] = tempBuilding
     }
 
 
