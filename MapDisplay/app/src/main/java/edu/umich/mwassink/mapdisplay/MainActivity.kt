@@ -11,8 +11,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         BuildingDirectoryMap = LinkedHashMap<String, Building>()
-        var tempBuilding = Building
+        val tempBuilding = Building
+        val tempRoom = Room
+        tempBuilding.rooms[tempRoom.number] = tempRoom
+        val tempEntry = Entry
+        tempBuilding.entries[tempEntry.id] = tempEntry
         BuildingDirectoryMap[tempBuilding.name] = tempBuilding
+
+        // Data to be passed in is tempBuilding. Then we can access all the information we need from there
+        // tempBuilding.rooms["1670]  .x or .y
+        // tembBuilding.entries["1"]  .x or .y
+
     }
 
 
