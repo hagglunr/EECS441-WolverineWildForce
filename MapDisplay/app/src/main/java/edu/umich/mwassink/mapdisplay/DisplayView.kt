@@ -14,6 +14,7 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
 
         setRenderer(renderer)
 
+
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean{
