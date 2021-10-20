@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
 import android.location.Location
-import android.util.ArrayMap
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -16,10 +15,6 @@ import com.google.android.gms.tasks.Task
 import okhttp3.Request
 
 class UpdateUserLocation : AppCompatActivity() {
-
-    private var longitude : Float? = null
-    private var latitude : Float? = null
-
     private val serverURL = ""
 
     private val fusedLocationClient: FusedLocationProviderClient by lazy {
@@ -28,7 +23,10 @@ class UpdateUserLocation : AppCompatActivity() {
 
     private var cancellationTokenSource = CancellationTokenSource()
 
-    fun getLocationFromGPS() {
+    fun getLocationFromGPS() : Pair<Double, Double> {
+        var latitude = 0.0
+        var longitude = 0.0
+
         // Get current location from GPS data
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -40,13 +38,12 @@ class UpdateUserLocation : AppCompatActivity() {
                     cancellationTokenSource.token
                 )
 
-
             currentLocationTask.addOnCompleteListener { task: Task<Location> ->
                 val result = if (task.isSuccessful) {
                     val result: Location = task.result
                     "Location (success): ${result.latitude}, ${result.longitude}"
-                    longitude = result.longitude.toFloat()
-                    latitude = result.latitude.toFloat()
+                    longitude = result.longitude
+                    latitude = result.latitude
                 } else {
                     val exception = task.exception
                     "Location (failure): $exception"
@@ -55,6 +52,8 @@ class UpdateUserLocation : AppCompatActivity() {
                 Log.d(TAG, "getLocationFromGPS() result: $result")
             }
         }
+
+        return Pair(latitude, longitude)
     }
 
     fun getEntrance(building: String) {
@@ -63,10 +62,10 @@ class UpdateUserLocation : AppCompatActivity() {
 
         // Gather set of entrances to building from database
         val request = Request.Builder()
-            .url(serverUrl+"getimages/")
+            .url(serverURL+"getimages/")
             .build() // Refer to getChatts() from lab 1 to implement this AFTER backend is setup
 
-
         // Return the nearest neighbor entrance to current location
+
     }
 }
