@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">MGuide</string>
+    <string-array name="buildings">
+        <item>BBB</item>
+        <item>PIER</item>
+    </string-array>
+    <string-array name="BBB">
+        <item>1620 -- CAEN Lab-East </item>
+        <item>1625 -- Student Projects </item>
+        <item>1637 -- Learning Center </item>
+        <item>1648 -- Student Orgs </item>
+        <item>1670 -- Classroom </item>
+        <item>1690 -- Classroom </item>
+        <item>1695 -- CAEN Lab-West </item>
+    </string-array>
+    <string-array name="PIER">
+        <item>B505 -- Lab </item>
+        <item>B507 -- Lab </item>
+        <item>B521 -- Office Hours </item>
+    </string-array>
 </resources>
