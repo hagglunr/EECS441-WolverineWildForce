@@ -39,5 +39,14 @@ class MainActivity : AppCompatActivity() {
             override fun onNothingSelected(p0: AdapterView<*>?) {
             }
         }
+
+        val search_button_view = findViewById<Button>(R.id.search_button)
+        search_button_view.setOnClickListener {
+            val building = building_spinner_view.getSelectedItem().toString()
+            val room = room_spinner_view.getSelectedItem().toString()
+            Toast.makeText(applicationContext, "Searching $building $room ...", Toast.LENGTH_SHORT).show()
+        }
+
+
     }
 }
