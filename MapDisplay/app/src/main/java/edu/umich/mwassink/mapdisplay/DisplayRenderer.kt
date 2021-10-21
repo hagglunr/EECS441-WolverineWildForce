@@ -28,6 +28,9 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     var bufferName: Int
     var numVertices: Int
     var vertices: FloatArray
+    var scaleFactor: Float
+    var transLeft: Float
+    var transUp: Float
     init {
         view = v
         width = 0
@@ -53,6 +56,9 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         bufferName = -1
         numVertices = 2
         vertices =  floatArrayOf(.5f, .5f, -5f, 1f, .25f ,.25f, -5f, 1f)
+        scaleFactor = 1f
+        transLeft = 0f
+        transUp = 0f
 
 
     }
@@ -118,7 +124,11 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
-        var orthoProj: Geometry.Matrix = geo.orthoProj(r, l, t, b, 100f, .5f)
+        var orthoProj: Geometry.Matrix
+        synchronized(this) {
+            orthoProj = geo.orthoProj(r, l, t, b, 100f, .5f)
+        }
+
         var buff: FloatArray = orthoProj.copyToArray()
         var v = Geometry.Vector(.5f, .5f, -5f, 1.0f)
         var v2 = orthoProj * v
@@ -160,6 +170,38 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
 
 
 
+    }
+
+    fun lerp(v1: Float, v2: Float, t: Float): Float {
+        return (v1*(1f-t) + v2*t)
+    }
+
+
+
+    fun changeScale(scaleNew: Float) {
+        var prevScale = scaleFactor
+        scaleFactor = scaleNew
+        var ratio = prevScale / scaleFactor
+        var dx = (r - l) / 2
+        var dy = (t - b) / 2
+        var ymid = lerp(b,t, .5f)
+        var xmid = lerp(l,r,.5f)
+        synchronized(this) {
+            l = xmid - dx * ratio
+            r = xmid + dx * ratio
+            t = ymid + dy * ratio
+            b = ymid - dy * ratio
+        }
+
+    }
+
+    fun changeTrans(dx: Float, dy: Float) {
+         synchronized(this) {
+             l += dx
+             r += dx
+             t -= dy
+             b -= dy
+         }
     }
 
     fun contiguousMatrix(f: FloatArray): FloatBuffer {
