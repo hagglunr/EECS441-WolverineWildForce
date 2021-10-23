@@ -3,15 +3,12 @@ package edu.umich.wwf
 import android.content.Context
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.Math.pow
-import java.util.*
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -38,13 +35,6 @@ class UpdateUserLocation : AppCompatActivity() {
                                 latitude = infoReceived[1].toString().toDouble(),
                                 longitude = infoReceived[2].toString().toDouble(),
                                 neighbors = arrayListOf<Node?>()
-//                            geodata = geoArr?.let { GeoData(
-//                                lat = it[0].toString().toDouble(),
-//                                lon = it[1].toString().toDouble(),
-//                                loc = it[2].toString(),
-//                                facing = it[3].toString(),
-//                                speed = it[4].toString()
-//                            )}
                             )
                         )
                     } else {
@@ -59,6 +49,7 @@ class UpdateUserLocation : AppCompatActivity() {
         }
         queue.add(getRequest)
         getClosestEntrance(user)
+
         // Make call to getLocationFromGPS
 
         // Gather set of entrances to building from database

@@ -68,7 +68,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val building = ""
         // TODO: change building to var later
 //        building = getBuilding()
-        updateUserLocation.getClosestEntrance(building)
+//        updateUserLocation.getEntrances(user, building, context = )
+        // TODO: Fix context to call function
 
         setContentView(R.layout.activity_main)
     }
