@@ -1,18 +1,28 @@
 package edu.umich.wwf
 
-import android.Manifest
-import android.content.ContentValues.TAG
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.location.Geocoder
 import android.location.Location
+import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.Menu.FIRST
+import android.view.Menu.NONE
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationTokenSource
-import com.google.android.gms.tasks.Task
-import okhttp3.Request
+import edu.umich.jadb.kotlinChatter.ChattStore.postChatt
+import java.util.*
 
 class UpdateUserLocation : AppCompatActivity() {
     private val serverURL = ""
@@ -23,7 +33,32 @@ class UpdateUserLocation : AppCompatActivity() {
 
     private var cancellationTokenSource = CancellationTokenSource()
 
-    fun getLocationFromGPS() : Pair<Double, Double> {
+    fun updateGeoData() {
+        LocationServices.getFusedLocationProviderClient(applicationContext)
+            .getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    lat = it.result.latitude
+                    lon = it.result.longitude
+                    speed = it.result.speed
+                    if (!enableSend) {
+                        submitChatt()
+                    }
+                } else {
+                    Log.e("PostActivity getFusedLocation", it.exception.toString())
+                }
+            }
+
+        // read sensors to determine bearing
+        sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+        accelerometer?.let {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_FASTEST)
+        }
+        magnetometer?.let {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_FASTEST)
+        }
         var latitude = 0.0
         var longitude = 0.0
 

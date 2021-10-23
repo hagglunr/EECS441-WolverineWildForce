@@ -1,19 +1,13 @@
 package edu.umich.wwf
-import edu.umich.wwf.UpdateUserLocation
 
-class User {
-    var latitude = 0.0
-    var longitude = 0.0
-    var nearest_node = Node(0.0, 0.0, ArrayList())
-    var entrance_node = EntranceNode(0.0, 0.0, ArrayList())
-    var destination_node = DestinationNode(0.0, 0.0, ArrayList())
+class User(var lat: Double = 0.0, var lon: Double = 0.0, var loc: String = "",
+              var facing: String = "unknown", var speed: Float = 0.0f)
 
-    fun getUserLocation() {
-        var (longitude, latitude) = UpdateUserLocation.getLocationFromGPS()
-    }
-
-    fun getNearestNode() {
-
-    }
-}
+//    fun getUserLocation() {
+//        var (longitude, latitude) = UpdateUserLocation.getLocationFromGPS()
+//    }
+//
+//    fun getNearestNode() {
+//
+//    }
 
