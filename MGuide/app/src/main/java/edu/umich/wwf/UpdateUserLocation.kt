@@ -1,99 +1,53 @@
 package edu.umich.wwf
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
-import android.location.Geocoder
-import android.location.Location
-import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.Menu.FIRST
-import android.view.Menu.NONE
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.tasks.CancellationTokenSource
-import edu.umich.jadb.kotlinChatter.ChattStore.postChatt
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley.newRequestQueue
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
+import kotlin.reflect.full.declaredMemberProperties
 import java.util.*
 
 class UpdateUserLocation : AppCompatActivity() {
     private val serverURL = ""
+    private val buildingName = ""
+    private lateinit var queue: RequestQueue
 
-    private val fusedLocationClient: FusedLocationProviderClient by lazy {
-        LocationServices.getFusedLocationProviderClient(applicationContext)
-    }
+    fun getClosestEntrance(building: String) {
+        val entrances = arrayListOf<Node?>()
+        val getRequest = JsonObjectRequest(serverURL+"?buildingName="+buildingName,
+            { response ->
+                val infoReceived = try { response.getJSONArray("maps") } catch (e: JSONException) { JSONArray() }
+                val nFields = 3
 
-    private var cancellationTokenSource = CancellationTokenSource()
-
-    fun updateGeoData() {
-        LocationServices.getFusedLocationProviderClient(applicationContext)
-            .getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
-            .addOnCompleteListener {
-                if (it.isSuccessful) {
-                    lat = it.result.latitude
-                    lon = it.result.longitude
-                    speed = it.result.speed
-                    if (!enableSend) {
-                        submitChatt()
+                for (i in 0 until infoReceived.length()) {
+                    val entrance = infoReceived[i] as JSONArray
+                    if (entrance.length() == nFields) {
+                        val geoArr = if (entrance[3] == JSONObject.NULL) null else JSONArray(entrance[3] as String)
+                        entrances.add(Node(username = chattEntry[0].toString(),
+                            message = chattEntry[1].toString(),
+                            timestamp = chattEntry[2].toString(),
+                            geodata = geoArr?.let { GeoData(
+                                lat = it[0].toString().toDouble(),
+                                lon = it[1].toString().toDouble(),
+                                loc = it[2].toString(),
+                                facing = it[3].toString(),
+                                speed = it[4].toString()
+                            )}
+                        ))
+                    } else {
+                        Log.e("getChatts", "Received unexpected number of fields: " + chattEntry.length().toString() + " instead of " + nFields.toString())
                     }
-                } else {
-                    Log.e("PostActivity getFusedLocation", it.exception.toString())
                 }
-            }
-
-        // read sensors to determine bearing
-        sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
-        accelerometer?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_FASTEST)
-        }
-        magnetometer?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_FASTEST)
-        }
-        var latitude = 0.0
-        var longitude = 0.0
-
-        // Get current location from GPS data
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED) {
-
-                val currentLocationTask: Task<Location> = fusedLocationClient.getCurrentLocation(
-                    PRIORITY_HIGH_ACCURACY,
-                    cancellationTokenSource.token
-                )
-
-            currentLocationTask.addOnCompleteListener { task: Task<Location> ->
-                val result = if (task.isSuccessful) {
-                    val result: Location = task.result
-                    "Location (success): ${result.latitude}, ${result.longitude}"
-                    longitude = result.longitude
-                    latitude = result.latitude
-                } else {
-                    val exception = task.exception
-                    "Location (failure): $exception"
-                }
-
-                Log.d(TAG, "getLocationFromGPS() result: $result")
-            }
-        }
-
-        return Pair(latitude, longitude)
-    }
-
-    fun getEntrance(building: String) {
+                completion()
+            }, { completion() }
+        )
         // Make call to getLocationFromGPS
-        getLocationFromGPS()
 
         // Gather set of entrances to building from database
         val request = Request.Builder()

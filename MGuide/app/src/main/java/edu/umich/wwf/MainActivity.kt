@@ -64,32 +64,52 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_FASTEST)
         }
 
-        // Get current location from GPS data
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED) {
-
-            val currentLocationTask: Task<Location> = fusedLocationClient.getCurrentLocation(
-                PRIORITY_HIGH_ACCURACY,
-                cancellationTokenSource.token
-            )
-
-            currentLocationTask.addOnCompleteListener { task: Task<Location> ->
-                val result = if (task.isSuccessful) {
-                    val result: Location = task.result
-                    "Location (success): ${result.latitude}, ${result.longitude}"
-                    longitude = result.longitude
-                    latitude = result.latitude
-                } else {
-                    val exception = task.exception
-                    "Location (failure): $exception"
-                }
-
-                Log.d(TAG, "getLocationFromGPS() result: $result")
-            }
-        }
+        var updateUserLocation = UpdateUserLocation()
+        val building = ""
+        // TODO: change building to var later
+//        building = getBuilding()
+        updateUserLocation.getClosestEntrance(building)
 
         setContentView(R.layout.activity_main)
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
+
+    var gravity: FloatArray = emptyArray<Float>().toFloatArray()
+    var geomagnetic: FloatArray = emptyArray<Float>().toFloatArray()
+
+    override fun onSensorChanged(event: SensorEvent) {
+        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER)
+            gravity = event.values
+        if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD)
+            geomagnetic = event.values
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        accelerometer?.let {
+            sensorManager.unregisterListener(this, it)
+        }
+        magnetometer?.let {
+            sensorManager.unregisterListener(this, it)
+        }
+    }
+
+    fun convertBearing(): String {
+        if (gravity.isNotEmpty() && geomagnetic.isNotEmpty()) {
+            val R = FloatArray(9)
+            val I = FloatArray(9)
+            if (SensorManager.getRotationMatrix(R, I, gravity, geomagnetic)) {
+                val orientation = FloatArray(3)
+                SensorManager.getOrientation(R, orientation)
+                // the 3 elements of orientation: azimuth, pitch, and roll,
+                // bearing is azimuth = orientation[0], in rad
+                val bearingdeg = (Math.toDegrees(orientation[0].toDouble()) + 360).rem(360)
+                val compass = arrayOf("North", "NE", "East", "SE", "South", "SW", "West", "NW", "North")
+                val index = (bearingdeg / 45).toInt()
+                return compass[index]
+            }
+        }
+        return "unknown"
     }
 }
