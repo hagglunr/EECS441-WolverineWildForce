@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
         launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        launcher.launch(Manifest.permission.HIGH_SAMPLING_RATE_SENSORS)
 
         LocationServices.getFusedLocationProviderClient(applicationContext)
             .getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
