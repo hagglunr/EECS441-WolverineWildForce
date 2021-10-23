@@ -34,7 +34,7 @@ class UpdateUserLocation : AppCompatActivity() {
                                 entranceNum = infoReceived[0].toString().toInt(),
                                 latitude = infoReceived[1].toString().toDouble(),
                                 longitude = infoReceived[2].toString().toDouble(),
-                                neighbors = arrayListOf<Node?>()
+                                neighbors = arrayListOf<Node>()
                             )
                         )
                     } else {
@@ -69,7 +69,7 @@ class UpdateUserLocation : AppCompatActivity() {
             val entranceLat = entrances[i]!!.latitude
             val entranceLon = entrances[i]!!.longitude
             val distance =
-                sqrt((user.lat - entranceLat).pow(2) + (user.lon - entranceLon).pow(2))
+                sqrt((user.lat - entranceLat!!).pow(2) + (user.lon - entranceLon!!).pow(2))
             if (distance < shortestDistance) {
                 shortestDistance = distance
                 shortestIndex = i

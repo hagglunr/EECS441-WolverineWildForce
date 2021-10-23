@@ -1,8 +1,8 @@
 package edu.umich.wwf
 
-open class Node(entranceNum: Double, latitude: Double, longitude: ArrayList<Node>, neighbors: ArrayList<Node?>) {
-    var entranceNum = 0
-    var latitude = latitude
-    var longitude = longitude
-    var neighbors = neighbors
-}
+open class Node(
+    var entranceNum: Int? =null,
+    var latitude: Double? = null,
+    var longitude: Double? = null,
+    var neighbors: ArrayList<Node>? = null
+)
