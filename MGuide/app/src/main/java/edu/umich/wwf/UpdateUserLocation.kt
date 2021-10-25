@@ -50,15 +50,6 @@ class UpdateUserLocation : AppCompatActivity() {
         queue.add(getRequest)
         getClosestEntrance(user)
 
-        // Make call to getLocationFromGPS
-
-        // Gather set of entrances to building from database
-//        val request = Request.Builder()
-//            .url(serverURL+"getimages/")
-//            .build() // Refer to getChatts() from lab 1 to implement this AFTER backend is setup
-
-        // Return the nearest neighbor entrance to current location
-
     }
 
     // TODO: Later consider having default entrance in case of null or bad server request
