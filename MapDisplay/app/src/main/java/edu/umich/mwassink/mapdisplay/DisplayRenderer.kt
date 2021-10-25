@@ -1,6 +1,8 @@
 package edu.umich.mwassink.mapdisplay
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.opengl.GLES20
 import android.opengl.GLES30
 import android.opengl.GLSurfaceView
@@ -18,6 +20,8 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     var ctr: Int
     var vertexShader: String
     var pixelShader: String
+    var vertexTexture: String
+    var pixelTexture: String
     var initialProgram: Int
     var orthoMatrixLocation: Int
     var geo: Geometry
@@ -31,6 +35,9 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     var scaleFactor: Float
     var transLeft: Float
     var transUp: Float
+    var mapTextureProgram: Int
+
+    var mapTextureHandle = -1
     init {
         view = v
         width = 0
@@ -46,8 +53,25 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
                 "gl_FragColor = vec4(0.0, 0.0 ,1.0, 1.0);" +
                 "}"
 
+        vertexTexture = "uniform mat4 projection;" +
+                "attribute vec4 pos;" +
+                "attribute vec2 uvIn;" +
+                "varying vec2 uvOut;"
+                "void main() {" +
+                " gl_Position = orthoProj * pos; " +
+                        "uvOut = uvIn;" +
+                " }";
+
+        pixelTexture = "uniform sampler2D tex;" +
+                "attribute vec2 uvOut"
+                "void main() {" +
+                        "gl_FragColor = texture2D(tex, uvOut);" +
+                "}"
+
+
         initialProgram = -1
         orthoMatrixLocation = -1
+        mapTextureProgram = -1
         geo = Geometry()
         r = 1f
         l = 0f
@@ -62,6 +86,8 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
 
 
     }
+
+
 
     fun createShader(vs: String, ps: String): Int {
         val status: IntArray = intArrayOf(0)
@@ -100,6 +126,7 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
 
 
         initialProgram = createShader(vertexShader, pixelShader)
+        mapTextureProgram = createShader(vertexTexture, pixelTexture)
         orthoMatrixLocation = GLES20.glGetUniformLocation(initialProgram, "orthoProj")
         val indexBuffer: IntBuffer = IntBuffer.allocate(1)
         GLES20.glGenBuffers(1, indexBuffer)
@@ -119,16 +146,7 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         GLES20.glViewport(0, 0, width, height)
     }
 
-    override fun onDrawFrame(p0: GL10?) {
-
-
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
-
-        var orthoProj: Geometry.Matrix
-        synchronized(this) {
-            orthoProj = geo.orthoProj(r, l, t, b, 100f, .5f)
-        }
-
+    fun drawPoints(orthoProj: Geometry.Matrix) {
         var buff: FloatArray = orthoProj.copyToArray()
         var v = Geometry.Vector(.5f, .5f, -5f, 1.0f)
         var v2 = orthoProj * v
@@ -139,6 +157,25 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
 
         GLES20.glEnableVertexAttribArray(0)
         GLES20.glDrawArrays(GLES20.GL_POINTS, 0, numVertices)
+    }
+
+    fun drawMap(orthoProj: Geometry.Matrix) {
+        
+    }
+
+    override fun onDrawFrame(p0: GL10?) {
+
+
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+
+        var orthoProj: Geometry.Matrix
+        synchronized(this) {
+            orthoProj = geo.orthoProj(r, l, t, b, 100f, .5f)
+        }
+
+        drawPoints(orthoProj)
+
+
 
     }
 
