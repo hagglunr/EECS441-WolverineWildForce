@@ -6,11 +6,13 @@ import android.graphics.BitmapFactory
 import android.opengl.GLES20
 import android.opengl.GLES30
 import android.opengl.GLSurfaceView
+import android.opengl.GLUtils
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 import javax.microedition.khronos.egl.EGLConfig
+import javax.microedition.khronos.opengles.GL
 import javax.microedition.khronos.opengles.GL10
 
 class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
@@ -36,7 +38,12 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     var transLeft: Float
     var transUp: Float
     var mapTextureProgram: Int
-
+    var pointBuffer = -1
+    var heightPicture: Float
+    var widthPicture: Float
+    var defaultDepth = -5f
+    var texturePointsHandle = -1
+    var pictureVertices: FloatArray
     var mapTextureHandle = -1
     init {
         view = v
@@ -53,13 +60,15 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
                 "gl_FragColor = vec4(0.0, 0.0 ,1.0, 1.0);" +
                 "}"
 
-        vertexTexture = "uniform mat4 projection;" +
+        vertexTexture = "uniform mat4 orthoProj;" +
+                "uniform float height" +
+                "uniform float width" +
                 "attribute vec4 pos;" +
-                "attribute vec2 uvIn;" +
                 "varying vec2 uvOut;"
                 "void main() {" +
                 " gl_Position = orthoProj * pos; " +
-                        "uvOut = uvIn;" +
+                        "vec2 v = pos.xy" +
+                        "uvOut = vec2(v.x / width, v.y / height);" +
                 " }";
 
         pixelTexture = "uniform sampler2D tex;" +
@@ -80,10 +89,23 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         bufferName = -1
         numVertices = 2
         vertices =  floatArrayOf(.5f, .5f, -5f, 1f, .25f ,.25f, -5f, 1f)
+
         scaleFactor = 1f
         transLeft = 0f
         transUp = 0f
+        heightPicture = 628f
+        widthPicture = 1093f
+        pictureVertices = floatArrayOf(0f, heightPicture, defaultDepth, 1f, 0f, 0f, defaultDepth, 1f, widthPicture, 0f,
+        defaultDepth, 1f, 0f, heightPicture, defaultDepth, 1f, widthPicture, heightPicture, defaultDepth, 1f,
+        widthPicture, 0f, defaultDepth, 1f)
 
+
+        /*
+        upperLeftCorner = Geometry.Vector(0f, heightPicture, defaultDepth, 1f  )
+        upperRightCorner= Geometry.Vector(widthPicture, heightPicture, defaultDepth, 1f)
+        lowerLeftCorner = Geometry.Vector(0f, 0f, defaultDepth, 1f)
+        lowerRightCorner = Geometry.Vector(widthPicture, 0f, defaultDepth, 1f)
+        */
 
     }
 
@@ -121,6 +143,7 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
         width = view.width
         height = view.height
+        loadMapTexture(view.context)
         GLES20. glClearColor(1.0f, 1.0f, 1.0f, 1f)
         var err: Int = GLES20.glGetError()
 
@@ -128,13 +151,20 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         initialProgram = createShader(vertexShader, pixelShader)
         mapTextureProgram = createShader(vertexTexture, pixelTexture)
         orthoMatrixLocation = GLES20.glGetUniformLocation(initialProgram, "orthoProj")
+
         val indexBuffer: IntBuffer = IntBuffer.allocate(1)
         GLES20.glGenBuffers(1, indexBuffer)
-
-        bufferName = indexBuffer[0]
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, bufferName)
-
+        pointBuffer = indexBuffer[0]
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, pointBuffer)
         GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 4*4*numVertices, arrToBuffer(vertices, 4*numVertices*4), GLES20.GL_STATIC_DRAW  )
+
+        val texturePointBuffer: IntBuffer = IntBuffer.allocate(1)
+        GLES20.glGenBuffers(1, texturePointBuffer)
+        texturePointsHandle  = texturePointBuffer[0]
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, texturePointsHandle)
+        val numPoints = 6
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, numPoints, arrToBuffer(pictureVertices, 4*numVertices*4),
+        GLES20.GL_STATIC_DRAW)
 
         GLES20.glUseProgram(initialProgram)
 
@@ -147,10 +177,12 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     }
 
     fun drawPoints(orthoProj: Geometry.Matrix) {
+        GLES20.glUseProgram(initialProgram)
         var buff: FloatArray = orthoProj.copyToArray()
         var v = Geometry.Vector(.5f, .5f, -5f, 1.0f)
         var v2 = orthoProj * v
         GLES20.glUniformMatrix4fv(orthoMatrixLocation, 1, false, buff, 0)
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, pointBuffer)
 
 
         GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, 0)
@@ -160,6 +192,25 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     }
 
     fun drawMap(orthoProj: Geometry.Matrix) {
+        GLES20.glUseProgram(mapTextureProgram)
+        GLES20.glBindTexture(0, mapTextureHandle)
+        var buff: FloatArray = orthoProj.copyToArray()
+        orthoMatrixLocation = GLES20.glGetUniformLocation(mapTextureProgram, "orthoProj")
+        GLES20.glUniformMatrix4fv(orthoMatrixLocation, 1, false, buff, 0)
+        var widthLocation = GLES20.glGetUniformLocation(mapTextureProgram, "width")
+        var heightLocation = GLES20.glGetUniformLocation(mapTextureProgram, "height")
+        GLES20.glUniform1f(widthLocation, widthPicture)
+        GLES20.glUniform1f(heightLocation, heightPicture)
+
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, texturePointsHandle)
+        GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, 0)
+
+        GLES20.glEnableVertexAttribArray(0)
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 6)
+
+
+
+
         
     }
 
@@ -168,12 +219,15 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
+
         var orthoProj: Geometry.Matrix
         synchronized(this) {
             orthoProj = geo.orthoProj(r, l, t, b, 100f, .5f)
         }
 
+        drawMap(orthoProj)
         drawPoints(orthoProj)
+
 
 
 
@@ -253,4 +307,21 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         b.rewind()
         return b
     }
+
+    fun loadMapTexture(ctx: Context) {
+        var textureProgramBuff: IntArray= IntArray(1)
+        GLES20.glGenTextures(1, textureProgramBuff, 0)
+        mapTextureHandle = textureProgramBuff[0]
+        var bmp: Bitmap = BitmapFactory.decodeResource(ctx.resources, R.drawable.ic_action_bbb, BitmapFactory.Options() )
+        // Make active and set linear filtering
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D , mapTextureHandle)
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bmp, 0)
+        bmp.recycle()
+
+        // unbind the texture here?
+
+    }
+
 }

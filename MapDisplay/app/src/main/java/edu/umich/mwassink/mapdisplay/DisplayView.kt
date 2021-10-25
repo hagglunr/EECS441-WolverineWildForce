@@ -26,8 +26,6 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
         setEGLContextClientVersion(2)
         setPreserveEGLContextOnPause(true)
         renderer = DisplayRenderer(this)
-        loadMapTexture()
-        renderer.mapTexture = textureHandle
         setRenderer(renderer)
         scale = 1f
         scaleFactor = 1f
@@ -68,21 +66,7 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
     }
 
 
-    fun loadMapTexture() {
-        var textureProgramBuff: IntArray= IntArray(1)
-        GLES20.glGenTextures(1, textureProgramBuff, 0)
-        textureHandle = textureProgramBuff[0]
-        var bmp: Bitmap = BitmapFactory.decodeResource(getContext().resources, R.drawable.ic_action_bbb, BitmapFactory.Options() )
-        // Make active and set linear filtering
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D , textureHandle)
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bmp, 0)
-        bmp.recycle()
 
-        // unbind the texture here?
-
-    }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean{
         println("touch changed")
