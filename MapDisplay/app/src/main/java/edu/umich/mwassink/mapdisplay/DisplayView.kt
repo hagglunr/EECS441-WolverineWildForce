@@ -55,8 +55,8 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
                 distanceX: Float,
                 distanceY: Float
             ): Boolean {
-                transRight = distanceX / 1000f / scaleFactor
-                transUp = distanceY / 1000f / scaleFactor
+                transRight = distanceX / 3f / scaleFactor
+                transUp = distanceY / 3f / scaleFactor
                 return true
             }
         }
