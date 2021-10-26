@@ -61,18 +61,18 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
                 "}"
 
         vertexTexture = "uniform mat4 orthoProj;" +
-                "uniform float height" +
-                "uniform float width" +
+                "uniform float height;" +
+                "uniform float width;" +
                 "attribute vec4 pos;" +
-                "varying vec2 uvOut;"
+                "varying vec2 uvOut;" +
                 "void main() {" +
                 " gl_Position = orthoProj * pos; " +
-                        "vec2 v = pos.xy" +
+                        "vec2 v = pos.xy;" +
                         "uvOut = vec2(v.x / width, v.y / height);" +
                 " }";
 
         pixelTexture = "uniform sampler2D tex;" +
-                "attribute vec2 uvOut"
+                "varying vec2 uvOut;" +
                 "void main() {" +
                         "gl_FragColor = texture2D(tex, uvOut);" +
                 "}"
@@ -163,7 +163,7 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         texturePointsHandle  = texturePointBuffer[0]
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, texturePointsHandle)
         val numPoints = 6
-        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, numPoints, arrToBuffer(pictureVertices, 4*numVertices*4),
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, numPoints * 4 * 4, arrToBuffer(pictureVertices, 4*numPoints*4),
         GLES20.GL_STATIC_DRAW)
 
         GLES20.glUseProgram(initialProgram)
@@ -193,7 +193,10 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
 
     fun drawMap(orthoProj: Geometry.Matrix) {
         GLES20.glUseProgram(mapTextureProgram)
-        GLES20.glBindTexture(0, mapTextureHandle)
+        var err = GLES20.glGetError()
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mapTextureHandle)
+        err = GLES20.glGetError()
         var buff: FloatArray = orthoProj.copyToArray()
         orthoMatrixLocation = GLES20.glGetUniformLocation(mapTextureProgram, "orthoProj")
         GLES20.glUniformMatrix4fv(orthoMatrixLocation, 1, false, buff, 0)
@@ -201,12 +204,14 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         var heightLocation = GLES20.glGetUniformLocation(mapTextureProgram, "height")
         GLES20.glUniform1f(widthLocation, widthPicture)
         GLES20.glUniform1f(heightLocation, heightPicture)
+        err = GLES20.glGetError()
 
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, texturePointsHandle)
         GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, 0)
 
         GLES20.glEnableVertexAttribArray(0)
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 6)
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
+        err = GLES20.glGetError()
 
 
 
@@ -318,6 +323,7 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bmp, 0)
+        var err = GLES20.glGetError()
         bmp.recycle()
 
         // unbind the texture here?
