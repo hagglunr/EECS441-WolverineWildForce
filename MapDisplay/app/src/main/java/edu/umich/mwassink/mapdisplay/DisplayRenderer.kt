@@ -14,6 +14,10 @@ import java.nio.IntBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL
 import javax.microedition.khronos.opengles.GL10
+import android.util.DisplayMetrics
+
+
+
 
 class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     var view: GLSurfaceView;
@@ -45,6 +49,7 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     var texturePointsHandle = -1
     var pictureVertices: FloatArray
     var mapTextureHandle = -1
+    var ratio: Float
     init {
         view = v
         width = 0
@@ -56,8 +61,11 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
                 "    gl_Position = orthoProj*pos;" + //gl_Position is the opengl clipSpaceCoordinate of vertex - Note: opengl may not render GL_POINT if any part of the point is outside of clipSpace
                 "    gl_PointSize = 40.;" +                      //gl_Point size is the size of GL_POINT vertices in pixels
                 "}";
-        pixelShader = "void main() {" +
+        pixelShader = "precision mediump float;" +
+                "uniform float red;" +
+                "void main() {" +
                 "gl_FragColor = vec4(0.0, 0.0 ,1.0, 1.0);" +
+                "if (red > 0.0) { gl_FragColor = vec4(1.0, 0.0 ,0.0, 1.0); }" +
                 "}"
 
         vertexTexture = "uniform mat4 orthoProj;" +
@@ -79,14 +87,16 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
                 "}"
 
 
+
         initialProgram = -1
         orthoMatrixLocation = -1
         mapTextureProgram = -1
         geo = Geometry()
-        r = 1093f
+        r = 1000f
         l = 0f
         b = 0f
-        t = 628f
+        t = 1000f
+        ratio = 1f
         bufferName = -1
         numVertices = 2
 
@@ -149,6 +159,13 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         width = view.width
         height = view.height
         loadMapTexture(view.context)
+        val metrics: DisplayMetrics = view.context.getResources().getDisplayMetrics()
+        ratio = metrics.heightPixels.toFloat() / metrics.widthPixels.toFloat()
+        r = 1000f
+        l = 0f
+        b = 0f
+        //t = 1000f  / ratio
+        t = 1000f
         GLES20. glClearColor(1.0f, 1.0f, 1.0f, 1f)
         var err: Int = GLES20.glGetError()
 
@@ -174,6 +191,7 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
 
         GLES20.glUseProgram(initialProgram)
+        GLES20.glLineWidth(30f)
 
 
     }
@@ -191,6 +209,8 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         var v = Geometry.Vector(.5f, .5f, -5f, 1.0f)
         var v2 = orthoProj * v
         var mLoc = GLES20.glGetUniformLocation(initialProgram, "orthoProj")
+        var redLoc = GLES20.glGetUniformLocation(initialProgram, "red")
+        GLES20.glUniform1f(redLoc, 0f)
         GLES20.glUniformMatrix4fv(orthoMatrixLocation, 1, false, buff, 0)
         err = GLES20.glGetError()
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, pointBuffer)
@@ -200,7 +220,11 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, 0)
 
         GLES20.glEnableVertexAttribArray(0)
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, numVertices)
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, numVertices-1)
+        redLoc = GLES20.glGetUniformLocation(initialProgram, "red")
+        GLES20.glUniform1f(redLoc, 1f)
+        GLES20.glDrawArrays(GLES20.GL_LINES, 0, numVertices)
+        GLES20.glDrawArrays(GLES20.GL_POINTS, numVertices-1, 1)
         err = GLES20.glGetError()
 
     }

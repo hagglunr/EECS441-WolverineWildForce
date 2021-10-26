@@ -28,4 +28,8 @@ class MainActivity : AppCompatActivity() {
     fun launchGL(v: View) {
         startActivity(Intent(this, DisplayActivity::class.java))
     }
+
+    fun launchWalk(v: View) {
+        startActivity(Intent(this, WalkActivity::class.java))
+    }
 }
