@@ -50,6 +50,7 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     var pictureVertices: FloatArray
     var mapTextureHandle = -1
     var ratio: Float
+    var userPos: FloatArray
     init {
         view = v
         width = 0
@@ -66,6 +67,7 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
                 "void main() {" +
                 "gl_FragColor = vec4(0.0, 0.0 ,1.0, 1.0);" +
                 "if (red > 0.0) { gl_FragColor = vec4(1.0, 0.0 ,0.0, 1.0); }" +
+                "if (red > 5.0) { gl_FragColor = vec4(0.0, 1.0 ,0.0, 1.0); }" +
                 "}"
 
         vertexTexture = "uniform mat4 orthoProj;" +
@@ -106,6 +108,7 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         transUp = 0f
         heightPicture = 628f
         widthPicture = 1093f
+        userPos = floatArrayOf(200f, 200f, -5f, 1f)
         vertices =  floatArrayOf(widthPicture/2, heightPicture/2, -5f, 1f, .25f ,.25f, -5f, 1f)
         pictureVertices = floatArrayOf(0f, heightPicture, defaultDepth, 1f,
             widthPicture, 0f, defaultDepth, 1f,
@@ -216,15 +219,28 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, pointBuffer)
         err = GLES20.glGetError()
 
-
+        // points along
         GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, 0)
 
         GLES20.glEnableVertexAttribArray(0)
         GLES20.glDrawArrays(GLES20.GL_POINTS, 0, numVertices-1)
+        // end
         redLoc = GLES20.glGetUniformLocation(initialProgram, "red")
         GLES20.glUniform1f(redLoc, 1f)
         GLES20.glDrawArrays(GLES20.GL_LINES, 0, numVertices)
         GLES20.glDrawArrays(GLES20.GL_POINTS, numVertices-1, 1)
+        GLES20.glDisableVertexAttribArray(0)
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
+
+        val buffCPUMemory = arrToBuffer(userPos, 16)
+
+        // user
+        redLoc = GLES20.glGetUniformLocation(initialProgram, "red")
+        GLES20.glUniform1f(redLoc, 10f)
+        GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, buffCPUMemory)
+        GLES20.glEnableVertexAttribArray(0)
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1)
+
         err = GLES20.glGetError()
 
     }
@@ -368,6 +384,13 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
 
         // unbind the texture here?
 
+    }
+
+    fun changePos(dx: Float, dy: Float) {
+        synchronized(this) {
+            userPos[0] += dx
+            userPos[1] += dy
+        }
     }
 
 }

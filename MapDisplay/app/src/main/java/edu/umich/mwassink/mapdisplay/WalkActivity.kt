@@ -15,7 +15,6 @@ class WalkActivity : AppCompatActivity(), SensorEventListener {
 
     lateinit var sensorManager: SensorManager
     var steps: Float = 0f
-    var startSteps: Float = 0f
     var sensorOn = false
     var firstValue: Float = -1f
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -83,6 +83,9 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
         renderer.changeScale(scale)
     }
 
+    fun changePos(dx: Float, dy: Float) {
+        renderer.changePos(dx, dy)
+    }
 
 
 }
