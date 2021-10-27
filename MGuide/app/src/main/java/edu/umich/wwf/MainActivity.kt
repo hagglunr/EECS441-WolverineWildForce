@@ -20,8 +20,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         view = ActivityMainBinding.inflate(layoutInflater)
-        view.root.setBackgroundColor(
-            Color.parseColor("#3399FF"))
+//        view.root.setBackgroundColor(
+//            Color.parseColor("#3399FF"))
         setContentView(view.root)
 
         view.buildingSpinnerView.setAdapter(ArrayAdapter<String>(this,
