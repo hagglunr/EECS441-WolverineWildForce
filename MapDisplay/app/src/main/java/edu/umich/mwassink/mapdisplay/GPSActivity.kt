@@ -3,30 +3,24 @@ package edu.umich.wwf
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
-import android.location.Geocoder
-import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationTokenSource
-import com.google.android.gms.tasks.Task
 import edu.umich.mwassink.mapdisplay.R
 import java.util.*
 
 @SuppressLint("MissingPermission")
-class MainActivity_2 : AppCompatActivity(), SensorEventListener {
+class GPSActivity : AppCompatActivity(), SensorEventListener {
     private var user = User()
     private lateinit var sensorManager: SensorManager
     private var accelerometer: Sensor? = null
@@ -76,7 +70,7 @@ class MainActivity_2 : AppCompatActivity(), SensorEventListener {
 //        updateUserLocation.getEntrances(user, building, context = )
         // TODO: Fix context to call function
 
-        setContentView(R.layout.activity_main_2)
+        setContentView(R.layout.activity_gps)
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}

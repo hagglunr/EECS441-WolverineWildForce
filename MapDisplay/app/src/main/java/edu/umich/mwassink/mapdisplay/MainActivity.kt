@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import edu.umich.wwf.GPSActivity
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +35,6 @@ class MainActivity : AppCompatActivity() {
     }
     
     fun launchGPS(v: View) {
-        startActivity(Intent(this, MainActivity_2::class.java))
+        startActivity(Intent(this, GPSActivity::class.java))
     }
 }
