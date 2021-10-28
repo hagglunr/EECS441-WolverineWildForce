@@ -32,4 +32,8 @@ class MainActivity : AppCompatActivity() {
     fun launchWalk(v: View) {
         startActivity(Intent(this, WalkActivity::class.java))
     }
+    
+    fun launchGPS(v: View) {
+        startActivity(Intent(this, MainActivity_2::class.java))
+    }
 }
