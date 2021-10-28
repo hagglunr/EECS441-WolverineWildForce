@@ -1,4 +1,4 @@
-package edu.umich.wwf
+package edu.umich.mwassink.mapdisplay
 
 open class Node(
     var entranceNum: Int? =null,

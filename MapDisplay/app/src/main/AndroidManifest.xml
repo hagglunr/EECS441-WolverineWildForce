@@ -16,9 +16,18 @@
 
         <activity
             android:name=".WalkActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".DisplayActivity"
+            android:label="@string/display"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".SearchActivity"
+            android:label="@string/display"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".GPSActivity"
             android:label="@string/display"
             android:parentActivityName=".MainActivity" />
         <activity

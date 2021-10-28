@@ -1,4 +1,4 @@
-package edu.umich.wwf
+package edu.umich.mwassink.mapdisplay
 
 import android.Manifest
 import android.annotation.SuppressLint

@@ -5,12 +5,13 @@
       <map>
         <entry key="..\:/Users/MarkW/Documents/441/EECS441-WolverineWildForce/MapDisplay/app/src/main/res/layout/activity_main.xml" value="0.33" />
         <entry key="..\:/Users/MarkW/Documents/441/EECS441-WolverineWildForce/MapDisplay/app/src/main/res/layout/activity_walk.xml" value="0.33" />
+        <entry key="..\:/Users/hagglunr/Documents/GitHub/EECS441-WolverineWildForce/MapDisplay/app/src/main/res/layout/activity_main.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_main_2.xml" value="0.19021739130434784" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

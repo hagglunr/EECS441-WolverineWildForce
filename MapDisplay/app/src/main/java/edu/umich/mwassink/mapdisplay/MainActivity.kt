@@ -4,7 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import edu.umich.wwf.GPSActivity
+import edu.umich.mwassink.mapdisplay.GPSActivity
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,5 +36,9 @@ class MainActivity : AppCompatActivity() {
     
     fun launchGPS(v: View) {
         startActivity(Intent(this, GPSActivity::class.java))
+    }
+
+    fun launchSearch(v: View) {
+        startActivity(Intent(this, SearchActivity::class.java))
     }
 }
