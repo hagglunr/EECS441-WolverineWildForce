@@ -23,7 +23,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     var sensorOn = false
     var firstValue: Float = -1f
     val stepLength: Float = 10f
-
+    var sensor: Sensor? = null
 
     init {
 
@@ -52,12 +52,12 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     override fun onResume() {
         super.onResume()
 
-        val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         if (sensor != null) {
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
             sensorOn = true
         } else {
-            System.exit(1)
+            //System.exit(1)
         }
 
     }
@@ -65,7 +65,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
 
         var prevSteps = steps
-        if (sensorOn) {
+        if (sensorOn && sensor != null) {
             if (firstValue < 0f) {
                 firstValue = event.values[0]
                 prevSteps = firstValue

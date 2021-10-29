@@ -17,6 +17,7 @@ class WalkActivity : AppCompatActivity(), SensorEventListener {
     var steps: Float = 0f
     var sensorOn = false
     var firstValue: Float = -1f
+    var sensor: Sensor? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_walk)
@@ -40,12 +41,12 @@ class WalkActivity : AppCompatActivity(), SensorEventListener {
     override fun onResume() {
         super.onResume()
 
-        val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         if (sensor != null) {
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
             sensorOn = true
         } else {
-            System.exit(1)
+            //System.exit(1)
         }
 
     }
@@ -53,7 +54,7 @@ class WalkActivity : AppCompatActivity(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
 
         var st = findViewById<TextView>(R.id.steps)
-        if (sensorOn) {
+        if (sensorOn && sensor != null) {
             if (firstValue < 0f) {
                 firstValue = event.values[0]
             }
