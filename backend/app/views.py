@@ -8,8 +8,8 @@ def getNodes(request):
     if request.method != 'GET':
 	    return HttpResponse(status=404)
     
-    response = {}
-    if 'building' not in request.GET or request.GET['building'] == '':
+    # response = {}
+    # if 'building' not in request.GET or request.GET['building'] == '':
 	    return  JsonResponse(response)
 
     cursor = connection.cursor()
