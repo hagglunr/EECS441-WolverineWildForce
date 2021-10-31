@@ -11,6 +11,19 @@ package edu.umich.mwassink.mapdisplay
 // 0 0 0 2
 class Geometry {
 
+     fun orthoProj(r: Float, l: Float, t: Float, b: Float, f: Float,
+                   n: Float ): Matrix {
+         var far = f
+         var near = n
+         val c1 = Vector(2/ (r-l), 0f, 0f, 0f)
+         val c2 = Vector(0f, 2/(t-b), 0f, 0f)
+         val c3 = Vector(0f, 0f, -2/(far-near), 0f)
+         val c4 = Vector(-(r+l)/(r-l), -(t+b)/(t-b), -(far+near)/(far -near), 1f)
+
+         return Matrix(c1, c2, c3, c4)
+     }
+
+
     class Matrix (val c1In: Vector, val c2In: Vector, val c3In: Vector, val c4In: Vector){
         val c1: Vector
         val c2: Vector
@@ -33,14 +46,15 @@ class Geometry {
             return Vector(x, y, z, w)
         }
         // Map xmin to -1, xmax to 1 (w will be kept as 1)
-        fun orthoProj(r: Float, l: Float, t: Float, b: Float, far: Float,
-                      near: Float ): Matrix {
-            val c1 = Vector(2/ (r-l), 0f, 0f, 0f)
-            val c2 = Vector(0f, 2/(t-b), 0f, 0f)
-            val c3 = Vector(0f, 0f, -2/(far-near), 0f)
-            val c4 = Vector(-(r+l)/(r-l), -(t+b)/(t-b), -(far+near)/(far -near), 1f)
 
-            return Matrix(c1, c2, c3, c4)
+
+        fun copyToArray(): FloatArray {
+            val f = FloatArray(16)
+            c1.copyToArray(0, f)
+            c2.copyToArray(4, f)
+            c3.copyToArray(8, f)
+            c4.copyToArray(12, f)
+            return f
         }
     }
 
@@ -55,6 +69,14 @@ class Geometry {
             z = zIn
             w = wIn
         }
+
+         fun copyToArray(start: Int, arr: FloatArray) {
+             arr[start + 0] = x
+             arr[start + 1] = y
+             arr[start + 2] = z
+             arr[start + 3] = w
+
+         }
 
      }
 
