@@ -5,6 +5,8 @@ import json
 # Create your views here.
 
 def getNodes(request):
+    response = {}
+    return  JsonResponse(response)
     if request.method != 'GET':
 	    return HttpResponse(status=404)
     
