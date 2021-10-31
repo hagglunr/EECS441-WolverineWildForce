@@ -1,2 +1,0 @@
-username: wwf
-pass: wwfwwf
