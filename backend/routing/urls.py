@@ -18,7 +18,7 @@ from django.urls import path
 from app import views
 
 urlpatterns = [
-    path('getNodes/', views.getNodes, name='getNodes'),
-    path('postNodes/', views.postNodes, name='postNodes'),
+    path('getnodes/', views.getnodes, name='getnodes'),
+    path('postnodes/', views.postnodes, name='postnodes'),
     path('admin/', admin.site.urls),
 ]
