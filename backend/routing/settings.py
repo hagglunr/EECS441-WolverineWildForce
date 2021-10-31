@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#w%#&9ogg03(60*afaod+hei_ot$wxtwbija0x_^lh_-#(%faf'
+SECRET_KEY = 'django-insecure-f(9b5n2p*gt2kv9k&_pg(2r!ltt8o)vg8kxzh^@xf2nm2fjgnc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['13.59.206.83', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['18.219.94.170', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -77,10 +78,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'wwfdb',
-	'USER': 'wwf',
-	'PASSWORD': 'wwfwwf',
-	'HOST': 'localhost',
-	'PORT': '',
+        'USER': 'wwf',
+        'PASSWORD': 'wwfwwf',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
@@ -128,4 +129,3 @@ STATIC_ROOT = BASE_DIR / 'static'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
