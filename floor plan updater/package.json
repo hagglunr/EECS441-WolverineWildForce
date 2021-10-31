@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/hagglunr/EECS441-WolverineWildForce/issues"
   },
-  "homepage": "https://github.com/hagglunr/EECS441-WolverineWildForce#readme"
+  "homepage": "https://github.com/hagglunr/EECS441-WolverineWildForce#readme",
+  "dependencies": {
+    "axios": "^0.24.0"
+  }
 }
