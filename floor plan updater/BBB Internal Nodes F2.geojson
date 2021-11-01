@@ -1,0 +1,21 @@
+{"type":"FeatureCollection", "features":[
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71621024401779,42.29286101613688,262.1712791870175]},"properties":{"id":"03B48AB1E11DEEACAA75","name":"Spiral Stairs"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71618439499477,42.29283965159527,261.8105675166042]},"properties":{"id":"0F492E44FB1DEEAD0783","name":"J1"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71621031528868,42.29283968792275,261.8500649504099]},"properties":{"id":"054BB51FD11DEEAD29F5","name":"J2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71620980048492,42.2927649640217,260.2216519798242]},"properties":{"id":"09AC1052161DEEAD840D","name":"J3"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71624636981215,42.29277078771126,260.6498871395303]},"properties":{"id":"0CE59D8F7B1DEEADE84B","name":"Conference R2725"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.7163351077369,42.29276881436415,260.1965936716155]},"properties":{"id":"07D1E6DAAC1DEEAE211D","name":"Conference R2733"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71646816811948,42.29276909142766,259.5142884965406]},"properties":{"id":"069787C4281DEEAE4848","name":"J4"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.7164679018402,42.29287801554396,260.7252426137704]},"properties":{"id":"0687E78AE71DEEAE8BB2","name":"J5"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71649434149805,42.29289825124587,261.2839442137691]},"properties":{"id":"08BF4C60931DEEAEE387","name":"Faculty and Staff Lounge 2907"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.7162334087457,42.29289363004257,262.4071708221441]},"properties":{"id":"015BDBD66B1DEEAF1FCE","name":"J6"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71611457793458,42.29287820062319,262.1301383772745]},"properties":{"id":"04DBEE5E271DEEAF7497","name":"J7"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.7160947434026,42.29292242835804,263.2274574034182]},"properties":{"id":"09B0047E221DEEB0118B","name":"Courtyard Entrance 1"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71614712135226,42.2931058331484,265.3981978294531]},"properties":{"id":"09BDDD21151DEEB30F94","name":"Courtyard Entrance 2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71622895503813,42.29302766649727,264.0358266805795]},"properties":{"id":"06125551D21DEEB0F741","name":"J8"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71625447562486,42.29303242763312,264.1271190324105]},"properties":{"id":"06AFDA0C911DEEB1626B","name":"Straight Stairs"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71625328233051,42.29305046691511,264.6095208805448]},"properties":{"id":"0D4FE96FC21DEEB1B91D","name":"GSRA Lounge 2917"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71622297834074,42.29310555987367,266.0934624194966]},"properties":{"id":"0E4EDBD6D71DEEB205C4","name":"J9"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71629273186107,42.29311277969047,266.2726190186929]},"properties":{"id":"0EDBF635591DEEB376C0","name":"Bathrooms"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71645685408858,42.29311563834548,265.5811754593001]},"properties":{"id":"0A19722C781DEEB39FE4","name":"J10"}}
+]}

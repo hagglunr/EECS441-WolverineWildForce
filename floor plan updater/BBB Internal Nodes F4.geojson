@@ -1,0 +1,22 @@
+{"type":"FeatureCollection", "features":[
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71621024401779,42.29286101613688,262.1712791870175]},"properties":{"id":"03B48AB1E11DEEACAA75","name":"Spiral Stairs"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71618439499477,42.29283965159527,261.8105675166042]},"properties":{"id":"0F492E44FB1DEEAD0783","name":"J1"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71621031528868,42.29283968792275,261.8500649504099]},"properties":{"id":"054BB51FD11DEEAD29F5","name":"J2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71646816811948,42.29276909142766,259.5142884965406]},"properties":{"id":"069787C4281DEEAE4848","name":"J4"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.7164679018402,42.29287801554396,260.7252426137704]},"properties":{"id":"0687E78AE71DEEAE8BB2","name":"J5"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71649434149805,42.29289825124587,261.2839442137691]},"properties":{"id":"08BF4C60931DEEAEE387","name":"Conference R4901"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.7162334087457,42.29289363004257,262.4071708221441]},"properties":{"id":"015BDBD66B1DEEAF1FCE","name":"J6"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71611457793458,42.29287820062319,262.1301383772745]},"properties":{"id":"04DBEE5E271DEEAF7497","name":"J7"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71622895503813,42.29302766649727,264.0358266805795]},"properties":{"id":"06125551D21DEEB0F741","name":"J8"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71645685408858,42.29311563834548,265.5811754593001]},"properties":{"id":"0A19722C781DEEB39FE4","name":"J10"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71648069383245,42.29311639644312,265.22280669792]},"properties":{"id":"053ED0F0C91DEEBC33B2","name":"Conference R4041"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71629037375101,42.29302928526742,263.9550167331952]},"properties":{"id":"008F02E17C1DEEBCB858","name":"Bathrooms 1"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.7162175209668,42.29316458198657,267.3182084632082]},"properties":{"id":"0E72C8900D1DEEBE3734","name":"J11"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71611665617522,42.29317660746231,266.1916935266936]},"properties":{"id":"063BBA95661DEEBE6CD1","name":"J12"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71612415451706,42.2932758432266,268.3591827935691]},"properties":{"id":"00BF4BA89A1DEEBE8F6D","name":"J13"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71582585487096,42.2928845688354,263.0487766195695]},"properties":{"id":"0F7A67AFBB1DEEBEC312","name":"J14"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71582205008444,42.2927642356083,259.7222767416042]},"properties":{"id":"0B8CA6E7CF1DEEBF1120","name":"J15"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71583109980546,42.2928523782478,261.9354863396618]},"properties":{"id":"0EB8589C7F1DEEC00294","name":"Bathrooms 2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71620980048492,42.2927649640217,260.2216413566762]},"properties":{"id":"0CFB9045341DEEC2115C","name":"Patio D1"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71631270391336,42.29276058208265,260.2601610855593]},"properties":{"id":"08F649637E1DEEC235C0","name":"Patio D2"}}
+]}

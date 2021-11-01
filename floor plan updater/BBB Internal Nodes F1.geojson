@@ -1,0 +1,17 @@
+{"type":"FeatureCollection", "features":[
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71627064943539,42.29271096245871,259.6284904977789]},"properties":{"id":"0EC6673D021DEEA08C87","name":"BBB Entrance"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71638416262677,42.29272519964592,259.4808465517042]},"properties":{"id":"00427FF2851DEEA55418","name":"CAEN Lab West D1"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71649297724593,42.29287138509722,260.4437561283528]},"properties":{"id":"0763AE79801DEE9EC79A","name":"CAEN Lab West D2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71646096024931,42.29287333194484,260.6152246883116]},"properties":{"id":"04D41D6E8E1DEE9F406D","name":"R1690 D1"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71651670536397,42.29286663363963,260.1586141427696]},"properties":{"id":"0A9E9153D71DEE9D0CB1","name":"R1690 D2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71633715819536,42.29287619567728,261.4046105032775]},"properties":{"id":"0FE335BBE61DEEA029DD","name":"R1670 D1"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71644162575548,42.29287680082465,260.784891155335]},"properties":{"id":"0729B34A1B1DEEA0D9D6","name":"R1670 D2"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71624009448935,42.29288116820907,262.2190890182036]},"properties":{"id":"0F1CA673ED1DEEA1F8C4","name":"J1"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71623876139823,42.29292465006375,262.9107953450796]},"properties":{"id":"0A15CF0F421DEEA262B5","name":"Bathrooms"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71620898788265,42.29285753755082,262.1384844016416]},"properties":{"id":"086B785C071DEEA30475","name":"Spiral Stairs"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71627710778583,42.29288836846508,262.0044574237147]},"properties":{"id":"011768FE4D1DEEA3E115","name":"Straight Stairs"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.7160056497782,42.29287305708329,261.981955276341]},"properties":{"id":"04E506F9DE1DEEA5B524","name":"Learning Center"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71590263731494,42.29287174697502,262.0344919368081]},"properties":{"id":"0199A5868C1DEEA60CA4","name":"Student Projects"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71602561111416,42.29286826083779,261.7593036993326]},"properties":{"id":"0CC453E99E1DEEA4DEE6","name":"CAEN Lab East D1"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-83.71588329761818,42.29287504004762,262.1737253959333]},"properties":{"id":"0358B21D431DEEA65136","name":"CAEN Lab East D2"}}
+]}
