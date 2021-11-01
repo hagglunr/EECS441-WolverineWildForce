@@ -13,7 +13,7 @@ def getnodes(request):
     if 'building' not in request.GET or request.GET['building'] == '':
 	    return  JsonResponse(response)
     cursor = connection.cursor()
-    cursor.execute('SELECT * FROM nodes WHERE building_name = %s;', (request.GET['building']))
+    cursor.execute('SELECT * FROM nodes WHERE building_name = "%s";', (request.GET['building']))
     rows = cursor.fetchall()
     response[request.GET['building']] = rows
     return JsonResponse(response)
