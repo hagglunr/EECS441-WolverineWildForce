@@ -1,9 +1,15 @@
 const fs = require('fs');
-const axios = require('axios')
+const axios = require('axios');
+const https = require('https');
 
 function post_request(node) {
-    console.log('here')
-    axios.post('https://3.19.66.229/post_nodes/', node);
+    const agent = new https.Agent({  
+        rejectUnauthorized: false
+    });
+    axios.post('https://52.14.13.109/postnodes/', {
+        data: node,
+        httpsAgent: agent,
+    });
 }
 
 async function upload_bbb_nodes() {

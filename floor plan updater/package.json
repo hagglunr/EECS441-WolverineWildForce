@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/hagglunr/EECS441-WolverineWildForce#readme",
   "dependencies": {
-    "axios": "^0.24.0"
+    "axios": "^0.24.0",
+    "https": "^1.0.0"
   }
 }
