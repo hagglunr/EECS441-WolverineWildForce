@@ -28,8 +28,8 @@ def postnodes(request):
     id = json_data['id']
     type = json_data['type']
     floor = json_data['floor']
-    long = json_data['long']
-    lat = json_data['lat']
+    long = json_data['coordinates'][0]
+    lat = json_data['coordinates'][1]
     neighbors = json_data['neighbors']
     cursor = connection.cursor()
     cursor.execute('INSERT INTO nodes (building_name, name, id, type, floor, long, lat, neighbors) VALUES '
