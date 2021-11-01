@@ -17,6 +17,8 @@ def getnodes(request):
     rows = cursor.fetchall()
     response[request.GET['building']] = rows
     return JsonResponse(response)
+
+@csrf_exempt
 def postnodes(request):
     if request.method != 'POST':
 	    return HttpResponse(status=404)
