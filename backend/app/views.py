@@ -26,7 +26,7 @@ def getbuildings(request):
     cursor = connection.cursor()
     cursor.execute('SELECT DISTINCT building_name FROM nodes;')
     rows = cursor.fetchall()
-    response = rows
+    response['buildings'] = rows
     return JsonResponse(response)
 
 def getrooms(request):
@@ -40,7 +40,7 @@ def getrooms(request):
     cursor = connection.cursor()
     cursor.execute('SELECT name FROM nodes WHERE type = (%s) AND building_name = (%s);', ('Room', request.GET['building'],))
     rows = cursor.fetchall()
-    response = rows
+    response[request.GET['building']+' Rooms'] = rows
     return JsonResponse(response)
 
 
