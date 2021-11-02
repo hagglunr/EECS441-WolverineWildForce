@@ -17,6 +17,32 @@ def getnodes(request):
     rows = cursor.fetchall()
     response[request.GET['building']] = rows
     return JsonResponse(response)
+    
+def getbuildings(request):
+    if request.method != 'GET':
+        return HttpResponse(status=404)
+
+    response = {}
+    cursor = connection.cursor()
+    cursor.execute('SELECT DISTINCT building_name FROM nodes;')
+    rows = cursor.fetchall()
+    response = rows
+    return JsonResponse(response)
+
+def getrooms(request):
+    if request.method != 'GET':
+        return HttpResponse(status=404)
+
+    response = {}
+    if 'building' not in request.GET or request.GET['building'] == '':
+	    return  JsonResponse(response)
+
+    cursor = connection.cursor()
+    cursor.execute('SELECT name FROM nodes WHERE type = (%s) AND building_name = (%s);', ('Room', request.GET['building'],))
+    rows = cursor.fetchall()
+    response = rows
+    return JsonResponse(response)
+
 
 @csrf_exempt
 def postnodes(request):
@@ -33,6 +59,6 @@ def postnodes(request):
     neighbors = json_data['neighbors']
     cursor = connection.cursor()
     cursor.execute('INSERT INTO nodes (building_name, name, id, type, floor, long, lat, neighbors) VALUES '
-                   '(%s, %s, %s, %s, %s, %s, %s, %s);', (building_name, name, id, type, floor, long, lat, neighbors))
+                   '(%s, %s, %s, %s, %s, %s, %s, %s);', (building_name, name, id, type, floor, long, lat, neighbors,))
     return JsonResponse({'status': 'success!'})
 

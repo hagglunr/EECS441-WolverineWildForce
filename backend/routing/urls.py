@@ -20,5 +20,7 @@ from app import views
 urlpatterns = [
     path('getnodes/', views.getnodes, name='getnodes'),
     path('postnodes/', views.postnodes, name='postnodes'),
+    path('getbuildings/', views.getbuildings, name='getbuildings'),
+    path('getrooms/', views.getrooms, name='getrooms'),
     path('admin/', admin.site.urls),
 ]
