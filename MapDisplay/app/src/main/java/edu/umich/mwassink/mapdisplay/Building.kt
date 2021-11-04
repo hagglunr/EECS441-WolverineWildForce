@@ -7,5 +7,4 @@ object Building {
     var width: Double = 1093.0
     var height: Double = 628.0
     var image = "res/drawable/ic_action_bbb.png" // TODO find a better way to access resource files
-
 }
