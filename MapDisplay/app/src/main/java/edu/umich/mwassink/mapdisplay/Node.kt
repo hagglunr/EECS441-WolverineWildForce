@@ -6,9 +6,10 @@ import kotlin.math.sqrt
 
 open class Node (
     val entranceNum: Int? = null,
+    val id: Int? = null,
     val latitude: Double? = null,
     val longitude: Double? = null,
-    val neighbors: ArrayList<Node>? = null
+    val neighbors: ArrayList<Int>? = null
 ) {
     fun isSameAs(node: Node): Boolean {
         if (this.latitude == node.latitude && this.longitude == node.longitude) {
