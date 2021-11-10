@@ -167,8 +167,8 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         r = 1000f
         l = 0f
         b = 0f
-        //t = 1000f  / ratio
-        t = 1000f
+        t = 1000f  * ratio
+        //t = 1000f
         GLES20. glClearColor(1.0f, 1.0f, 1.0f, 1f)
         var err: Int = GLES20.glGetError()
 

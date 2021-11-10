@@ -9,6 +9,7 @@ import android.opengl.GLUtils
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
+import android.widget.Toast
 
 class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
     val renderer: DisplayRenderer
@@ -41,7 +42,7 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
                 scaleFactor *= detector.scaleFactor
 
                 // Don't let the object get too small or too large.
-                scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 5.0f))
+                scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 15.0f))
 
                 return true
             }
@@ -70,6 +71,10 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
 
     override fun onTouchEvent(ev: MotionEvent): Boolean{
         println("touch changed")
+
+        var x: Float = ev.getX()
+        var y: Float = ev.getY()
+        println(java.lang.String.format("Event at (%f, %f)", x, y))
 
         mScaleDetector.onTouchEvent(ev)
         gestureDetector.onTouchEvent(ev)
