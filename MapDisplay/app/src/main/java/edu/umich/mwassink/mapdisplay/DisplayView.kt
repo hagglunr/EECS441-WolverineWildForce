@@ -34,7 +34,7 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
     lateinit var mostRecent: JSONArray
     var handledReq: Boolean = false
     var urlMe: String = "https://18.219.253.107/getmaps/"
-    var urlBBB: String = "https://52.14.13.109/getnodes/?building=BBB"
+    var urlBBB: String = "https://52.14.13.109/getrooms/"
 
     init {
         super.setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
@@ -112,13 +112,13 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
     }
 
     fun getNodes(building: String, context: Context, completion: () -> Unit) {
-        val getRequest = JsonObjectRequest( urlMe,
+        val getRequest = JsonObjectRequest( urlBBB,
             { response ->
                 Toast.makeText(context, "Handling Request",
                     Toast.LENGTH_LONG).show();
                 nodes.clear()
                 handledReq = true
-                val nodesReceived = try { response.getJSONArray("chatts") } catch (e: JSONException) { JSONArray() }
+                val nodesReceived = try { response.getJSONArray("rooms") } catch (e: JSONException) { JSONArray() }
                 for (i in 0 until nodesReceived.length()) {
                     val chattEntry = nodesReceived[i] as JSONArray
                     mostRecent  = nodesReceived[i] as JSONArray
