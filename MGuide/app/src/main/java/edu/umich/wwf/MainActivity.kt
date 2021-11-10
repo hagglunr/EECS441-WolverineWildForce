@@ -1,5 +1,6 @@
 package edu.umich.wwf
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -18,16 +19,14 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.android.volley.toolbox.Volley.newRequestQueue
-import edu.umich.wwf.BuildingStore.getBuildings
+import edu.umich.wwf.BuildingInfoStore.buildings
+import edu.umich.wwf.BuildingInfoStore.getBuildings
 import edu.umich.wwf.databinding.ActivityMainBinding
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONException
 
-//const val serverUrl = "https://52.14.13.109/"
-
 class MainActivity : AppCompatActivity() {
-
     private lateinit var view: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,13 +35,25 @@ class MainActivity : AppCompatActivity() {
         view = ActivityMainBinding.inflate(layoutInflater)
         setContentView(view.root)
 
+        fetchBuildngInfo()
+    }
+
+    private fun fetchBuildngInfo() {
+        getBuildings(applicationContext) {
+            createSearchView()
+        }
+    }
+
+    private fun createSearchView() {
+        Toast.makeText(applicationContext, "Receive ${buildings[0]}", Toast.LENGTH_SHORT).show()
+
         view.buildingSpinnerView.setAdapter(ArrayAdapter<String>(this,
-                                            android.R.layout.simple_spinner_item,
-                                            resources.getStringArray(R.array.buildings)))
+            android.R.layout.simple_spinner_item,
+            resources.getStringArray(R.array.buildings)))
 
         view.roomSpinnerView.setAdapter(ArrayAdapter(this,
-                                        android.R.layout.simple_spinner_item,
-                                        arrayOf<String>()))
+            android.R.layout.simple_spinner_item,
+            arrayOf<String>()))
 
         view.buildingSpinnerView.onItemSelectedListener = object :  AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
@@ -50,14 +61,18 @@ class MainActivity : AppCompatActivity() {
                 val building_id = resources.getIdentifier(building, "array", this@MainActivity.getPackageName())
                 Toast.makeText(applicationContext, "Building $building selected", Toast.LENGTH_SHORT).show()
                 view.roomSpinnerView.setAdapter(ArrayAdapter(this@MainActivity,
-                                                android.R.layout.simple_spinner_item,
-                                                resources.getStringArray(building_id)))
+                    android.R.layout.simple_spinner_item,
+                    resources.getStringArray(building_id)))
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
             }
         }
 
+        createArrivalButton()
+    }
+
+    private fun createArrivalButton() {
         view.searchButton.setOnClickListener {
             val building = view.buildingSpinnerView.getSelectedItem().toString()
             val room = view.roomSpinnerView.getSelectedItem().toString()
@@ -65,7 +80,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         view.arriveButton.setOnClickListener {
-            val inflater: LayoutInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            val inflater: LayoutInflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val popupView = inflater.inflate(R.layout.arrival, null)
 
             val popupWindow = PopupWindow(
@@ -87,10 +102,5 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         }
-        refresh()
-    }
-
-    private fun refresh() {
-        getBuildings(applicationContext)
     }
 }
