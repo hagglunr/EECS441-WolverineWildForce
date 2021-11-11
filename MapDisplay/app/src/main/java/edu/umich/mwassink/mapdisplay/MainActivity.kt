@@ -20,8 +20,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         view = ActivityMainBinding.inflate(layoutInflater)
-//        view.root.setBackgroundColor(
-//            Color.parseColor("#3399FF"))
         setContentView(view.root)
 
         view.buildingSpinnerView.setAdapter(ArrayAdapter<String>(this,
@@ -44,12 +42,6 @@ class MainActivity : AppCompatActivity() {
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
             }
-        }
-
-        view.searchButton.setOnClickListener {
-            val building = view.buildingSpinnerView.getSelectedItem().toString()
-            val room = view.roomSpinnerView.getSelectedItem().toString()
-            Toast.makeText(applicationContext, "Searching $building $room ...", Toast.LENGTH_SHORT).show()
         }
 
         view.arriveButton.setOnClickListener {
@@ -77,7 +69,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         view.searchButton.setOnClickListener {
-            startActivity(Intent(this, DebugActivity::class.java))
+//            startActivity(Intent(this, DebugActivity::class.java))
+            val building = view.buildingSpinnerView.getSelectedItem().toString()
+            val room = view.roomSpinnerView.getSelectedItem().toString()
+            Toast.makeText(applicationContext, "Searching $building $room ...", Toast.LENGTH_SHORT).show()
+            val i = Intent(this, NavigationActivity::class.java)
+            i.putExtra("building", building)
+            i.putExtra("room", room)
+            startActivity(i)
         }
 
     }

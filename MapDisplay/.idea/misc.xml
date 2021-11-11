@@ -8,7 +8,7 @@
         <entry key="..\:/Users/hagglunr/Documents/GitHub/EECS441-WolverineWildForce/MapDisplay/app/src/main/res/layout/activity_main.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_main_2.xml" value="0.19021739130434784" />
-        <entry key="app/src/main/res/layout/activity_navigation.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/activity_navigation.xml" value="0.1" />
       </map>
     </option>
   </component>
@@ -17,5 +17,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.1" />
+      </ProjectState>
+    </option>
   </component>
 </project>
