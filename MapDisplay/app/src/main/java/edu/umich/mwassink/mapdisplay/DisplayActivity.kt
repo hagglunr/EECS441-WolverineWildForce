@@ -1,24 +1,20 @@
 package edu.umich.mwassink.mapdisplay
 
 import android.Manifest
-import android.R
-import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import java.util.*
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
-import edu.umich.mwassink.mapdisplay.DisplayActivity.calculateFusedOrientationTask
-
-
-
 
 
 // Uses Code from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
@@ -65,7 +61,7 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
     // How often to run our filter
     val TIME_CONSTANT: Long = 30
     // How heavy of a filter to apply, closer to 1 means more gyro and less accMag
-    val FILTER_COEFFICIENT = 0.98f
+    val FILTER_COEFFICIENT = 1.0f
     private val fuseTimer = Timer()
     // END Code from Paul Lawitzki
 
@@ -110,11 +106,11 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
         // wait for one second until gyroscope and magnetometer/accelerometer
         // data is initialised then schedule the complementary filter task
         fuseTimer.scheduleAtFixedRate(
-            calculateFusedOrientationTask(),
+            CalculateFusedOrientationTask(),
             1000, TIME_CONSTANT
         )
         // END Code from Paul Lawitzki
-
+        // TODO probably need to throw something in here to reset the fused and gyro orientations every so often
     }
 
 
@@ -123,14 +119,13 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
         /*  TODO: Check if I need this code or not
         TODO: may need to call initListeners here again
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        sensor = mSensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         if (sensor != null) {
-            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+            mSensorManager?.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
             sensorOn = true
         } else {
             //System.exit(1)
-        }
-*/
+        }*/
     }
 
 
@@ -145,7 +140,7 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
     fun initListeners() {
         mSensorManager!!.registerListener(
             this,
-            mSensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+            mSensorManager!!.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
             SensorManager.SENSOR_DELAY_FASTEST
         )
         mSensorManager!!.registerListener(
@@ -158,28 +153,51 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
             mSensorManager!!.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
             SensorManager.SENSOR_DELAY_FASTEST
         )
-        // END Code from Paul Lawitzki
         mSensorManager!!.registerListener(
             this,
             mSensorManager!!.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
-            SensorManager.SENSOR_DELAY_FASTEST
+            SensorManager.SENSOR_DELAY_UI
         )
     }
+
+    // TODO delete
+//    var gyroCount: Int = 0
+//    var accCount: Int = 0
+//    var magCount: Int = 0
 
     // Code taken from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
     override fun onSensorChanged(event: SensorEvent) {
         // Todo: Could potentially throw checks in here to make sure that the sensor moved enough
         when (event.sensor.type) {
-            Sensor.TYPE_ACCELEROMETER -> {
+            Sensor.TYPE_LINEAR_ACCELERATION -> {
                 // copy new accelerometer data into accel array
                 // then calculate new orientation
                 System.arraycopy(event.values, 0, accel, 0, 3)
+//                calculateAccMagOrientation()
+            }
+            Sensor.TYPE_GYROSCOPE -> {     // process gyro data
+                gyroFunction(event)
+//            Log.d("gyro", "0: " + event.values[0] + "\n1: " + event.values[1] + "\n2: " + event.values[2])
+                /*if (abs(event.values[0]) > 0.02) {
+                    Log.d("x", "over" + event.values[0])
+                }
+                if (abs(event.values[1]) > 0.02) {
+                    Log.d("y", "over" + event.values[1])
+                }
+                if (abs(event.values[2]) > 0.01) {
+                    Log.d("z", "over" + event.values[2])
+                }*/
+//                gyroCount++
+//                Log.d("gyro", " " + gyroCount + " ")
+            }
+            Sensor.TYPE_MAGNETIC_FIELD -> {     // copy new magnetometer data into magnet array
+                System.arraycopy(event.values, 0, magnet, 0, 3)
                 calculateAccMagOrientation()
             }
-            Sensor.TYPE_GYROSCOPE ->         // process gyro data
-                gyroFunction(event)
-            Sensor.TYPE_MAGNETIC_FIELD ->         // copy new magnetometer data into magnet array
-                System.arraycopy(event.values, 0, magnet, 0, 3)
+            Sensor.TYPE_STEP_COUNTER -> {
+                Log.d("Steps", " " + event.values[0])
+                Log.d("Time", " " + timestamp)
+            }
         }
     }
     // END Code from Paul Lawitzki
@@ -207,10 +225,27 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
     }
 
     private fun calculateAccMagOrientation() {
+//        lateinit var oldAccMagOr: FloatArray
+//        oldAccMagOr = accMagOrientation.clone()
         if (SensorManager.getRotationMatrix(rotationMatrix, null, accel, magnet)) {
             SensorManager.getOrientation(rotationMatrix, accMagOrientation)
         }
+
+        /*
+        // 0.2 works pretty well
+        if (abs(accMagOrientation[0] - oldAccMagOr[0]) > 0.3) {
+            Log.d("z", "Changed azimuth")
+        }
+        if (abs(accMagOrientation[1] - oldAccMagOr[1]) > 0.1) {
+            Log.d("x", "Changed pitch")
+        }
+        if (abs(accMagOrientation[2] - oldAccMagOr[2]) > 0.2) {
+            Log.d("y", "Changed roll")
+        }
+//        Log.d("AccMag", "0: " + accMagOrientation[0] + "\n1: " + accMagOrientation[1] + "\n2: " + accMagOrientation[2])
+    */
     }
+
 
 
     private val NS2S = 1.0f / 1000000000.0f
@@ -358,7 +393,7 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
         return result
     }
 
-    inner class calculateFusedOrientationTask : TimerTask() {
+    inner class CalculateFusedOrientationTask : TimerTask() {
         // TODO: experiment with this filter_co value
         // How heavy of a filter to apply, closer to 1 means more gyro and less accMag
 //        val FILTER_COEFFICIENT = 0.98f
@@ -370,9 +405,9 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
                     + oneMinusCoeff * accMagOrientation[1])
             fusedOrientation[2] = (FILTER_COEFFICIENT * gyroOrientation[2]
                     + oneMinusCoeff * accMagOrientation[2])
-
+//            Log.d("Fusion", "0: " + fusedOrientation[0] + "\n1: " + fusedOrientation[1] + "\n2: " + fusedOrientation[2])
             // overwrite gyro matrix and orientation with fused orientation
-            // to comensate gyro drift
+            // to compensate gyro drift
             gyroMatrix = getRotationMatrixFromOrientation(fusedOrientation)
             System.arraycopy(fusedOrientation, 0, gyroOrientation, 0, 3)
         }
