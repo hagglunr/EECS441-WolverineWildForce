@@ -1,5 +1,6 @@
 package edu.umich.mwassink.mapdisplay
 
+import android.util.Log
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
@@ -113,9 +114,9 @@ class PathGenerator {
     fun getNodes(building: String) : ArrayList<Node> {
         var nodes = ArrayList<Node>()
         // Get all node info from building via request to our server
+        val completion: () -> Unit = null
         val url = "https://"+serverURL+"/getnodes/?building="+building as String
-        val getRequest = JsonObjectRequest(
-            Request.Method.GET, url, null,
+        val getRequest = JsonObjectRequest(url,
             { response ->
                 val infoReceived = try {
                     response.getJSONArray(building)
@@ -142,10 +143,8 @@ class PathGenerator {
                         )
                     )
                 }
-            },
-            { error ->
-                // TODO: Handle error
-            }
+                completion()
+            }, { completion() }
         )
         return nodes
     }
