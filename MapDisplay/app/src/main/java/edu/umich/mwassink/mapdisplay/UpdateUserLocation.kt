@@ -34,7 +34,7 @@ class UpdateUserLocation : AppCompatActivity() {
                                 entranceNum = infoReceived[0].toString().toInt(),
                                 latitude = infoReceived[1].toString().toDouble(),
                                 longitude = infoReceived[2].toString().toDouble(),
-                                neighbors = arrayListOf<Node>()
+                                neighbors = arrayListOf<Int>()
                             )
                         )
                     } else {

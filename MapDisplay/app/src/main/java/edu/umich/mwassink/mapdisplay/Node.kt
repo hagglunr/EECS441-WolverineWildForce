@@ -25,10 +25,10 @@ open class Node (
         return sqrt((this.latitude - node.latitude).pow(2) + (this.longitude - node.longitude).pow(2))
     }
 
-    fun getManhattanHeuristicValue(startNode: Node, endNode: Node): Double {
-        if (startNode.latitude == null || startNode.longitude == null || endNode.latitude == null || endNode.longitude == null) {
+    fun getManhattanHeuristicValue(endNode: Node): Double {
+        if (this.latitude == null || this.longitude == null || endNode.latitude == null || endNode.longitude == null) {
             return 0.0
         }
-        return abs(startNode.latitude - endNode.latitude) + abs(startNode.longitude - endNode.longitude)
+        return abs(this.latitude - endNode.latitude) + abs(this.longitude - endNode.longitude)
     }
 }

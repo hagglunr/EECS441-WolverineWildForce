@@ -1,5 +1,7 @@
 package edu.umich.mwassink.mapdisplay
 
+import com.android.volley.Request
+import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import org.json.JSONArray
 import org.json.JSONException
@@ -24,7 +26,7 @@ class PathGenerator {
         // h(Node) = estimated cost from Node to Goal based on Manhattan Heuristic
         var hList = ArrayList<Double>()
         for (node in nodesList) {
-            hList.add(getManhattanHeuristicValue(node, destinationNode))
+            hList.add(node.getManhattanHeuristicValue(destinationNode))
         }
 
         // g(Node) = cost so far to reach Node
@@ -36,12 +38,12 @@ class PathGenerator {
         while (!openList.isEmpty()) {
 
             // Consider node with lowest f score in open list
-            var checkNode = object : Node() {}
+            var checkNode = openList[0]
             var minFscore = Double.MAX_VALUE
             for (i in 0 until openList.size) {
                 val idx = openList[i].id as Int
                 if (hList[idx] + gList[idx] < minFscore) {
-                    checkNode = openList[i] as Node
+                    checkNode = openList[i]
                     minFscore = hList[idx] + gList[idx]
                 }
             }
@@ -108,12 +110,18 @@ class PathGenerator {
     }
 
     // Return all nodes SORTED BY ID ASCENDING of a given building as an ArrayList<Node>
-    private fun getNodes(building: String) : ArrayList<Node> {
+    fun getNodes(building: String) : ArrayList<Node> {
         var nodes = ArrayList<Node>()
         // Get all node info from building via request to our server
-        val getRequest = JsonObjectRequest(serverURL+"?buildingName="+building, {
-            response ->
-                val infoReceived = try { response.getJSONArray(building) } catch (e: JSONException) { JSONArray() }
+        val url = "https://"+serverURL+"/getnodes/?building="+building as String
+        val getRequest = JsonObjectRequest(
+            Request.Method.GET, url, null,
+            { response ->
+                val infoReceived = try {
+                    response.getJSONArray(building)
+                } catch (e: JSONException) {
+                    JSONArray()
+                }
                 for (i in 0 until infoReceived.length()) {
                     val nodeinfo = infoReceived[i] as JSONArray
                     val id = nodeinfo[1].toString().toInt()
@@ -134,7 +142,11 @@ class PathGenerator {
                         )
                     )
                 }
-        })
+            },
+            { error ->
+                // TODO: Handle error
+            }
+        )
         return nodes
     }
 }
