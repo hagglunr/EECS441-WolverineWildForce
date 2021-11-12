@@ -16,14 +16,16 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONException
+import kotlin.math.sqrt
 
-class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
+
+class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
     val renderer: DisplayRenderer
     var scale: Float
-    lateinit var mScaleDetector: ScaleGestureDetector
-    lateinit var scaleListener: ScaleGestureDetector.SimpleOnScaleGestureListener
-    lateinit var gestureListener: GestureDetector.SimpleOnGestureListener
-    lateinit var gestureDetector: GestureDetector
+    var mScaleDetector: ScaleGestureDetector
+    var scaleListener: ScaleGestureDetector.SimpleOnScaleGestureListener
+    var gestureListener: GestureDetector.SimpleOnGestureListener
+    var gestureDetector: GestureDetector
     var transRight: Float
     var transUp: Float
     var scaleFactor: Float
@@ -33,19 +35,24 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
     lateinit var queue: RequestQueue
     lateinit var mostRecent: JSONArray
     var handledReq: Boolean = false
+    var trackLines: Boolean = false
+    var l1: Int = -1
+    var l2: Int = -1
     var urlMe: String = "https://18.219.253.107/getmaps/"
     var urlBBB: String = "https://52.14.13.109/getrooms/"
+    var lastX: Float = -1f
+    var lastY: Float = -1f
 
     init {
         super.setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
         setEGLContextClientVersion(2)
         setPreserveEGLContextOnPause(true)
-        renderer = DisplayRenderer(this)
-        setRenderer(renderer)
+
         scale = 1f
         scaleFactor = 1f
         transRight = 0f
         transUp = 0f
+
 
 
         scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -78,6 +85,8 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
 
         gestureDetector = GestureDetector(context, gestureListener)
 
+        renderer = DisplayRenderer(this, building)
+        setRenderer(renderer)
         getNodes("BBB", context) {
 
         }
@@ -93,6 +102,32 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
 
         var x: Float = ev.getX()
         var y: Float = ev.getY()
+        var dx: Float = lastX - x
+        var dy: Float = lastY - y
+
+        if (sqrt((dx)*(dx) + dy*dy) > 25f)
+        lastX = x
+        lastY = y
+        renderer.addPoint(x, y)
+
+        if (trackLines) {
+            if (l1 == -1) {
+                l1 = renderer.ClosestPoint(x, y)
+            } else {
+                l2 = renderer.ClosestPoint(x, y)
+                if (l2 == l1) {
+                    l2 = -1
+                    l1 = -1
+                }
+                else {
+
+
+                    renderer.addLine(l1, l2)
+                    l1 = -1
+                    l2 = -1
+                }
+            }
+        }
         println(java.lang.String.format("Event at (%f, %f)", x, y))
 
         mScaleDetector.onTouchEvent(ev)
@@ -115,7 +150,7 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
         val getRequest = JsonObjectRequest( urlBBB,
             { response ->
                 Toast.makeText(context, "Handling Request",
-                    Toast.LENGTH_LONG).show();
+                    Toast.LENGTH_SHORT).show();
                 nodes.clear()
                 handledReq = true
                 val nodesReceived = try { response.getJSONArray("rooms") } catch (e: JSONException) { JSONArray() }
@@ -137,6 +172,33 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
             queue = Volley.newRequestQueue(context)
         }
         queue.add(getRequest)
+    }
+
+    // If I have a bunch of 2D points, then I can encode them in a different form with an s and a t value
+    // based off of some min and max points and interpolation
+    // e.g min (25, 25), max (50, 75)... 45, 50 -> .8, .5
+    fun interpArray(minX: Double, maxX: Double, minY: Double, maxY: Double, interleavedPoints: DoubleArray): FloatArray {
+        System.exit(1)
+        var f: FloatArray = FloatArray(interleavedPoints.size)
+        return f
+
+
+    }
+
+    fun setMoveMode(what: Boolean) {
+        renderer.SetMoveMode(what)
+
+    }
+
+    fun setPointMode(what: Boolean) {
+        renderer.SetPointMode(what)
+
+    }
+
+    fun setLineMode(what: Boolean) {
+        renderer.SetLineMode(what)
+        trackLines = what
+
     }
 
 

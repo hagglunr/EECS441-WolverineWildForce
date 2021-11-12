@@ -3,14 +3,20 @@ package edu.umich.mwassink.mapdisplay
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
+import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -19,14 +25,17 @@ import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.android.volley.toolbox.Volley.newRequestQueue
+import edu.umich.mwassink.mapdisplay.databinding.ActivityDisplayBinding
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.FileInputStream
 
 
 class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
     lateinit var view: DisplayView
+    lateinit var buttonView: ActivityDisplayBinding
     lateinit var sensorManager: SensorManager
     var steps: Float = 0f
     var sensorOn = false
@@ -42,8 +51,18 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     override fun onCreate(bundle: Bundle?): Unit{
 
         super.onCreate(bundle)
-        view = DisplayView(this)
+        val fileName: String? = intent.getStringExtra("buildingFile")
+        val inStream: FileInputStream = this.openFileInput(fileName)
+        var bmp: Bitmap = BitmapFactory.decodeStream(inStream)
+        inStream.close()
+        view = DisplayView(this, DefaultConnections(bmp))
         setContentView(view)
+
+        buttonView = ActivityDisplayBinding.inflate(layoutInflater)
+        addContentView(buttonView.root,
+            ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+
+
 
         val reqResult = ActivityResultContracts.RequestPermission()
 
@@ -57,6 +76,23 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         reqLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+        buttonView.LinesMode.setOnClickListener {
+            view.setLineMode(true)
+            view.setPointMode(false)
+            view.setMoveMode(false)
+        }
+        buttonView.PointMode.setOnClickListener {
+            view.setLineMode(false)
+            view.setPointMode(true)
+            view.setMoveMode(false)
+        }
+
+        buttonView.MoveMode.setOnClickListener {
+            view.setLineMode(false)
+            view.setPointMode(false)
+            view.setMoveMode(true)
+        }
     }
 
 

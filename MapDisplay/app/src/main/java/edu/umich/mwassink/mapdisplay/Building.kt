@@ -1,11 +1,63 @@
 package edu.umich.mwassink.mapdisplay
 
-object Building {
-    var name: String = "Bob and Betty Beyster Building"
-    val rooms = LinkedHashMap<String, Room>()
-    val entries = LinkedHashMap<String, Entry>()
-    var width: Double = 1093.0
-    var height: Double = 628.0
-    var image = "res/drawable/ic_action_bbb.png" // TODO find a better way to access resource files
+import android.content.Context
+import android.graphics.Bitmap
+import android.view.SurfaceControl
+import android.widget.Toast
+import java.io.*
+import java.nio.FloatBuffer
+import java.nio.IntBuffer
+
+class Building {
+    var Connections: Connections
+    lateinit var Texture: Bitmap
+    //var userX: Float
+    //var userY: Float
+
+
+    init {
+        Connections = Connections(floatArrayOf(), intArrayOf())
+
+    }
+
+    constructor(conns: Connections, texture: Bitmap)  {
+        Connections = conns
+        Texture = texture
+    }
+
+    constructor(nodeFileName: String, textureFileName: String, context: Context ){
+        ReadLocalFile(nodeFileName, textureFileName, context)
+    }
+
+    fun ReadLocalFile(nodeFileName: String, textureFileName: String, context: Context) {
+        // get files dir
+        try {
+
+            var nodeFile: File = File(context.filesDir, nodeFileName)
+            var textureFile: File = File(context.filesDir, textureFileName)
+            Connections = ObjectInputStream(FileInputStream(nodeFile)).readObject() as Connections
+            var oin: ObjectInputStream = ObjectInputStream(FileInputStream(textureFile))
+            Texture = readBitmap(oin)
+
+        } catch (ex: Exception) {
+            Toast.makeText(context, "Failure reading in building file",
+                Toast.LENGTH_LONG).show();
+
+        }
+    }
+
+    fun WriteLocalFile(nodeFileName: String, textureFileName: String, context: Context) {
+        try {
+            var nodeFile: File = File(context.filesDir, nodeFileName)
+            var textureFile: File = File(context.filesDir, textureFileName)
+            ObjectOutputStream(FileOutputStream(nodeFile)).writeObject(Connections)
+            var oout = ObjectOutputStream(FileOutputStream(textureFile))
+            writeBitmap(oout, Texture)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Failure writing out building file",
+                Toast.LENGTH_LONG).show();
+        }
+    }
+
 
 }
