@@ -1,5 +1,6 @@
 package edu.umich.mwassink.mapdisplay
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +21,11 @@ class NavigationActivity : AppCompatActivity() {
 
         Toast.makeText(applicationContext, "navigationActivity received: ${building + room}" , Toast.LENGTH_SHORT).show()
         view.destination.text = "$building $room"
+
+        view.exitButton.setOnClickListener{
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
     }
 
 }
