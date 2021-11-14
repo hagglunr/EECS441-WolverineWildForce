@@ -36,6 +36,7 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
     lateinit var mostRecent: JSONArray
     var handledReq: Boolean = false
     var trackLines: Boolean = false
+    var drag: Boolean = false
     var l1: Int = -1
     var l2: Int = -1
     var urlMe: String = "https://18.219.253.107/getmaps/"
@@ -116,8 +117,7 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
             } else {
                 l2 = renderer.ClosestPoint(x, y)
                 if (l2 == l1) {
-                    l2 = -1
-                    l1 = -1
+
                 }
                 else {
 
@@ -127,6 +127,9 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
                     l2 = -1
                 }
             }
+        } else if (drag) {
+            val cp = renderer.ClosestPoint(x, y)
+            renderer.SetPoint(cp, x, y)
         }
         println(java.lang.String.format("Event at (%f, %f)", x, y))
 
@@ -198,7 +201,15 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
     fun setLineMode(what: Boolean) {
         renderer.SetLineMode(what)
         trackLines = what
+        if (!trackLines) {
+            l1 = -1
+            l2 = -1
+        }
 
+    }
+
+    fun setDragMode(what: Boolean) {
+        drag = what
     }
 
 

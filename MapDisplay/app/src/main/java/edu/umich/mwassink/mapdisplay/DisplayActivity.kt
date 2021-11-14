@@ -81,17 +81,27 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             view.setLineMode(true)
             view.setPointMode(false)
             view.setMoveMode(false)
+            view.setDragMode(false)
         }
         buttonView.PointMode.setOnClickListener {
             view.setLineMode(false)
             view.setPointMode(true)
             view.setMoveMode(false)
+            view.setDragMode(false)
         }
 
         buttonView.MoveMode.setOnClickListener {
             view.setLineMode(false)
             view.setPointMode(false)
             view.setMoveMode(true)
+            view.setDragMode(false)
+        }
+
+        buttonView.Reposition.setOnClickListener {
+            view.setLineMode(false)
+            view.setPointMode(false)
+            view.setMoveMode(false)
+            view.setDragMode(true)
         }
     }
 

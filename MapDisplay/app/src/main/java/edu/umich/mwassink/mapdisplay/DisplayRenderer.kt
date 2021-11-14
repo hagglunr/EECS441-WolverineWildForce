@@ -489,6 +489,17 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
             return bestIndex
         }
 
+
+
+    }
+
+    fun SetPoint(index: Int, x: Float, y: Float) {
+        synchronized(this) {
+            val tx = invLerp(0f, realWidth, x)
+            val ty = invLerp(0f, realHeight, y)
+            customPoints.set(index*4, lerp(l, r, tx) )
+            customPoints.set(index*4 + 1, lerp(t, b, ty) )
+        }
     }
 
     // Indices into the float list
