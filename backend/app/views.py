@@ -73,10 +73,11 @@ def postfloorplans(request):
 
     # loading form-encoded data
     building_name = request.POST.get("building_name")
+    floor = request.POST.get("floor")
 
     if request.FILES.get("image"):
         content = request.FILES['image']
-        filename = building_name+".jpeg"
+        filename = building_name+"_"+floor+".jpeg"
         fs = FileSystemStorage()
         filename = fs.save(filename, content)
         imageurl = fs.url(filename)
@@ -84,8 +85,8 @@ def postfloorplans(request):
         imageurl = None
         
     cursor = connection.cursor()
-    cursor.execute('INSERT INTO floorplans (building_name, imageurl) VALUES '
-                   '(%s, %s);', (building_name, imageurl))
+    cursor.execute('INSERT INTO floorplans (building_name, floor, imageurl) VALUES '
+                   '(%s, %s, %s);', (building_name, floor, imageurl))
 
     return JsonResponse({})
 
