@@ -30,17 +30,13 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
     var transUp: Float
     var scaleFactor: Float
     var textureHandle = -1
-    var nodes =  arrayListOf<Double>()
-    val serverUrl: String = "https://52.14.13.109/"
-    lateinit var queue: RequestQueue
-    lateinit var mostRecent: JSONArray
-    var handledReq: Boolean = false
+
+
     var trackLines: Boolean = false
     var drag: Boolean = false
     var l1: Int = -1
     var l2: Int = -1
-    var urlMe: String = "https://18.219.253.107/getmaps/"
-    var urlBBB: String = "https://52.14.13.109/getrooms/"
+
     var lastX: Float = -1f
     var lastY: Float = -1f
 
@@ -88,9 +84,7 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
 
         renderer = DisplayRenderer(this, building)
         setRenderer(renderer)
-        getNodes("BBB", context) {
 
-        }
 
     }
 
@@ -149,33 +143,9 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
         renderer.changePos(dx, dy)
     }
 
-    fun getNodes(building: String, context: Context, completion: () -> Unit) {
-        val getRequest = JsonObjectRequest( urlBBB,
-            { response ->
-                Toast.makeText(context, "Handling Request",
-                    Toast.LENGTH_SHORT).show();
-                nodes.clear()
-                handledReq = true
-                val nodesReceived = try { response.getJSONArray("rooms") } catch (e: JSONException) { JSONArray() }
-                for (i in 0 until nodesReceived.length()) {
-                    val chattEntry = nodesReceived[i] as JSONArray
-                    mostRecent  = nodesReceived[i] as JSONArray
-                    if (chattEntry.length() == 3) {
-                        nodes.add(((chattEntry[0]).toString()).toDouble()) // n
-                        nodes.add(((chattEntry[1]).toString()).toDouble()) // w
-                    } else {
-                        Log.e("getChatts", "Received unexpected number of fields: " + chattEntry.length().toString() + " instead of " + 3.toString())
-                    }
-                }
-                completion()
-            }, { completion() }
-        )
 
-        if (!this::queue.isInitialized) {
-            queue = Volley.newRequestQueue(context)
-        }
-        queue.add(getRequest)
-    }
+
+
 
     // If I have a bunch of 2D points, then I can encode them in a different form with an s and a t value
     // based off of some min and max points and interpolation
