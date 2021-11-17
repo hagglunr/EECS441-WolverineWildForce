@@ -17,40 +17,48 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONException
+import org.json.JSONObject
 
 
 class DebugActivity : AppCompatActivity() {
     var nodes =  arrayListOf<Double>()
+    var connections = arrayListOf<Int>()
     val serverUrl: String = "https://52.14.13.109/"
     lateinit var queue: RequestQueue
     lateinit var mostRecent: JSONArray
-    var handledReq: Boolean = false
+    @Volatile var handledReq: Boolean = false
+    var reqComplete: Boolean = false
     fun getNodes(building: String, context: Context, completion: () -> Unit) {
-        val getRequest = JsonObjectRequest(serverUrl + "getrooms/" + building,
+        val getRequest = JsonObjectRequest(serverUrl + "getnodes/?building=" + building,
             { response ->
-                Toast.makeText(
-                    context, "Handling Request",
-                    Toast.LENGTH_SHORT
-                ).show();
                 nodes.clear()
+                Toast.makeText(context, "Handling request",
+                    Toast.LENGTH_SHORT).show();
                 handledReq = true
                 val nodesReceived = try {
-                    response.getJSONArray("rooms")
+                    response.getJSONArray("BBB")
                 } catch (e: JSONException) {
+
                     JSONArray()
                 }
                 for (i in 0 until nodesReceived.length()) {
                     val chattEntry = nodesReceived[i] as JSONArray
                     mostRecent = nodesReceived[i] as JSONArray
-                    if (chattEntry.length() == 3) {
-                        nodes.add(((chattEntry[0]).toString()).toDouble()) // n
-                        nodes.add(((chattEntry[1]).toString()).toDouble()) // w
+                    val neighbors = if (chattEntry[7] == JSONObject.NULL) null else chattEntry[7] as JSONArray
+                    if (chattEntry.length() == 8) {
+
+                        nodes.add(((chattEntry[6]).toString()).toDouble()) // long
+                        nodes.add(((chattEntry[5]).toString()).toDouble()) // latitude
+                        if (neighbors != null) {
+                            for (j in 0 until neighbors.length()) {
+                                val flanders = neighbors[j].toString().toInt()
+                                connections.add(i)
+                                connections.add(flanders)
+                            }
+                        }
                     } else {
-                        Log.e(
-                            "getChatts",
-                            "Received unexpected number of fields: " + chattEntry.length()
-                                .toString() + " instead of " + 3.toString()
-                        )
+                        Toast.makeText(context, "Wrong length expected 8 got " + chattEntry.length().toString(),
+                            Toast.LENGTH_SHORT).show();
                     }
                 }
                 completion()
@@ -62,6 +70,8 @@ class DebugActivity : AppCompatActivity() {
         }
         queue.add(getRequest)
     }
+
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,15 +93,39 @@ class DebugActivity : AppCompatActivity() {
         */
     }
 
+    fun setComplete() {
+        synchronized(this) {
+            reqComplete = true
+        }
+    }
+
 
     fun launchGL(v: View) {
+
+
         val th: Thread = Thread(Runnable() {
             var intent: Intent =Intent(this, DisplayActivity::class.java)
 
-
+            getNodes("BBB", context = applicationContext, {
+                runOnUiThread {
+                    setComplete()
+                }
+            })
+            var complete = false
+            while (!complete) {
+                synchronized(this) {
+                    complete = reqComplete
+                }
+            }
+            var buildingNodes = nodes
+            var conns = connections
             var iStream = (URL("https://52.14.13.109/media/BBB_1_glrqG87.jpeg").content) as InputStream
             var img = BitmapFactory.decodeStream(iStream)
-            intent.putExtra("buildingFile", "bbb.png")
+            var extras: Bundle = Bundle()
+            extras.putIntegerArrayList("connections", conns)
+            extras.putString("buildingFile", "bbb.png")
+            extras.putDoubleArray("nodes", buildingNodes.toDoubleArray() )
+            intent.putExtras(extras)
             val stream = this.openFileOutput("bbb.png", Context.MODE_PRIVATE)
             img.compress(Bitmap.CompressFormat.PNG, 100, stream)
             stream.close()

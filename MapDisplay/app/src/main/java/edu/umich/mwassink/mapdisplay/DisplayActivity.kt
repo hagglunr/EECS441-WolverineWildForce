@@ -51,11 +51,27 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     override fun onCreate(bundle: Bundle?): Unit{
 
         super.onCreate(bundle)
-        val fileName: String? = intent.getStringExtra("buildingFile")
+        val extras: Bundle? = intent.extras
+        val fileName: String? = extras?.getString("buildingFile")
+        val intarr = extras?.getIntegerArrayList("connections")
+        val nodes: DoubleArray?= extras?.getDoubleArray("nodes")
         val inStream: FileInputStream = this.openFileInput(fileName)
         var bmp: Bitmap = BitmapFactory.decodeStream(inStream)
         inStream.close()
-        view = DisplayView(this, DefaultConnections(bmp))
+        if (nodes == null || intarr == null) finish()
+        val intArr = intarr as ArrayList<Int>
+        // TODO DO NOT HARDCODE THIS BUT PUT IN DB
+
+        val flNodes = scaleDoubles(nodes as DoubleArray, -83.716537, 42.2926866,  -83.716103, 42.29279955,
+        29.318f, 549.536f, 37.166f, 204.9336f)
+
+
+
+
+        val conns: Connections = Connections(flNodes, intArr.toIntArray())
+        val building: Building = Building(conns, bmp )
+
+        view = DisplayView(this, building)
         setContentView(view)
 
         buttonView = ActivityDisplayBinding.inflate(layoutInflater)
@@ -146,6 +162,39 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
         return true
     }
+
+    fun invLerp(v1: Double, v2: Double, v: Double): Double {
+        return (v - v1) / (v2 - v1)
+    }
+
+    fun lerp(v1: Float, v2: Float, t: Float): Float {
+        return (v1*(1f-t) + v2*t)
+    }
+
+    // lower left (x1, y1) -> upper right (x2 ,y2)
+    // NOTE for some reason the latitude comes first in the coords
+    fun scaleDoubles(f: DoubleArray, x1: Double, y1: Double, x2: Double, y2: Double,
+                     x1f: Float, x2f: Float, y1f: Float, y2f: Float): FloatArray {
+
+        var fArr: ArrayList<Float> = ArrayList()
+        for (i in 0 until f.size/2) {
+            val tdx = invLerp(x1, x2, f[i*2+1]) //long first
+            val tdy = invLerp(y1, y2, f[i*2])
+            val txf = tdx.toFloat()
+            val tyf = tdy.toFloat()
+            val xf = lerp(x1f, x2f, txf)
+            val yf = lerp(y1f, y2f, tyf)
+            fArr.add(xf)
+            fArr.add(yf)
+            fArr.add(-5f)
+            fArr.add(1f)
+
+        }
+        return fArr.toFloatArray()
+
+
+    }
+
 
     // Pull the nodes down from the server
 
