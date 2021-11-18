@@ -11,7 +11,6 @@ import android.view.MotionEvent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import java.util.*
-import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -26,9 +25,11 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
     // lateinit var sensorManager: SensorManager
     var steps: Float = 0f
     var sensorOn = false
-    var firstValue: Float = -1f
+    // TODO need to experiment with this
     val stepLength: Float = 10f
     var sensor: Sensor? = null
+    var initialTime: Float = -1F
+    var gyroBegun: Boolean = false
 
     // Code taken from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
     private var mSensorManager: SensorManager?  = null
@@ -50,6 +51,14 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
     // orientation angles from accel and magnet
     private var accMagOrientation = FloatArray(3)
+
+    // Variables used to average the original accMagOrientation data
+    private var accMagOrientationSum = FloatArray(3)
+    private var accMagOrientationAverage = FloatArray(3)
+    private var accMagOrientationCount: Int = 0
+
+    // Array to hold our current world acceleration totals
+    private var worldAccelerationSumArray = FloatArray(3) {0F}
 
     // final orientation angles from sensor fusion
     private var fusedOrientation = FloatArray(3)
@@ -117,15 +126,8 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
     override fun onResume() {
         super.onResume()
 
-        /*  TODO: Check if I need this code or not
-        TODO: may need to call initListeners here again
-        sensor = mSensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        if (sensor != null) {
-            mSensorManager?.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
-            sensorOn = true
-        } else {
-            //System.exit(1)
-        }*/
+//        TODO: Check if I need this code or not
+//        TODO: may need to call initListeners here again
     }
 
 
@@ -145,6 +147,11 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
         )
         mSensorManager!!.registerListener(
             this,
+            mSensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+            SensorManager.SENSOR_DELAY_FASTEST
+        )
+        mSensorManager!!.registerListener(
+            this,
             mSensorManager!!.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
             SensorManager.SENSOR_DELAY_FASTEST
         )
@@ -157,6 +164,8 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
             this,
             mSensorManager!!.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
             SensorManager.SENSOR_DELAY_UI
+            // TODO measure how long this is, I may have to change my method for gathering direction if is short
+            // Might just need to gather accelerations until steps are taken, then reset
         )
     }
 
@@ -169,11 +178,22 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
         // Todo: Could potentially throw checks in here to make sure that the sensor moved enough
         when (event.sensor.type) {
-            Sensor.TYPE_LINEAR_ACCELERATION -> {
+            Sensor.TYPE_ACCELEROMETER -> {
+                // no longer need to worry about averaging the accMag orientation average if the gyro has begun
+                if (gyroBegun) return
+
                 // copy new accelerometer data into accel array
                 // then calculate new orientation
                 System.arraycopy(event.values, 0, accel, 0, 3)
-//                calculateAccMagOrientation()
+
+                calculateAccMagOrientation()
+            }
+            Sensor.TYPE_LINEAR_ACCELERATION -> {
+                if (!gyroBegun) {
+                    return
+                }
+
+                calculateWorldMovement(event)
             }
             Sensor.TYPE_GYROSCOPE -> {     // process gyro data
                 gyroFunction(event)
@@ -191,33 +211,50 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
 //                Log.d("gyro", " " + gyroCount + " ")
             }
             Sensor.TYPE_MAGNETIC_FIELD -> {     // copy new magnetometer data into magnet array
+                // no longer need to worry about averaging the accMag orientation average if the gyro has begun
+                if (gyroBegun) return
+
                 System.arraycopy(event.values, 0, magnet, 0, 3)
-                calculateAccMagOrientation()
+//                calculateAccMagOrientation()
             }
             Sensor.TYPE_STEP_COUNTER -> {
-                Log.d("Steps", " " + event.values[0])
-                Log.d("Time", " " + timestamp)
+                stepCounterEvent(event)
             }
         }
     }
+
     // END Code from Paul Lawitzki
 
 
-    /* TODO: Throw this is when dealing with the stepcounter
-    override fun onSensorChanged(event: SensorEvent) {
+    fun stepCounterEvent(event: SensorEvent) {
 
         var prevSteps = steps
         if (sensorOn && sensor != null) {
-            if (firstValue < 0f) {
-                firstValue = event.values[0]
-                prevSteps = firstValue
-            }
             steps = event.values[0]
             val newSteps = steps - prevSteps
-            view.changePos(newSteps * stepLength, 0f) // for now
+
+            var worldDistanceXratio: Float = 0F
+            var worldDistanceYratio: Float = 0F
+
+            // TODO: update this to align with how the step counter works
+            if (newSteps > 0) {
+                // normalize the direction that the user moved in the time that it took them to make a step
+                val worldDistanceX = worldAccelerationSumArray[0]
+                val worldDistanceY = worldAccelerationSumArray[1]
+                val totalDistance = worldDistanceX + worldDistanceY
+                worldDistanceXratio = worldDistanceX / totalDistance
+                worldDistanceYratio = worldDistanceY / totalDistance
+
+                // reset the world acceleration array each time that steps are taken
+                worldAccelerationSumArray = FloatArray(3) {0F}
+            }
+
+            val xDistance = newSteps * stepLength * worldDistanceXratio
+            val yDistance = newSteps * stepLength * worldDistanceYratio
+            view.changePos(xDistance, yDistance) // for now
 
         }
-    }*/
+    }
 
     // Code taken from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
@@ -231,6 +268,15 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
             SensorManager.getOrientation(rotationMatrix, accMagOrientation)
         }
 
+        accMagOrientationCount++
+        accMagOrientationSum[0] += accMagOrientation[0]
+        accMagOrientationSum[1] += accMagOrientation[1]
+        accMagOrientationSum[2] += accMagOrientation[2]
+//        Log.d("AccMag", "0: " + accMagOrientation[0] + "\n1: " + accMagOrientation[1] + "\n2: " + accMagOrientation[2])
+//        if (accMagOrientation[0] != 0.0F) {
+//            return
+//        }
+
         /*
         // 0.2 works pretty well
         if (abs(accMagOrientation[0] - oldAccMagOr[0]) > 0.3) {
@@ -242,24 +288,38 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
         if (abs(accMagOrientation[2] - oldAccMagOr[2]) > 0.2) {
             Log.d("y", "Changed roll")
         }
-//        Log.d("AccMag", "0: " + accMagOrientation[0] + "\n1: " + accMagOrientation[1] + "\n2: " + accMagOrientation[2])
     */
     }
 
 
 
     private val NS2S = 1.0f / 1000000000.0f
-    private var timestamp = 0f
+    private var gyroTimestamp = 0f
     private var initState = true
 
     private fun gyroFunction(event: SensorEvent) {
         // don't start until first accelerometer/magnetometer orientation has been acquired
-        if (accMagOrientation == null) return
+        if (initialTime == -1F) {
+            initialTime = event.timestamp.toFloat()
+            return
+        }
+
+        // Wait 10 seconds at the beginning for the phone to realize its position in the world
+        // Ideally this will be while the user is outside a building and away from artificial electromagnetic fields
+        val timeSinceBegan: Float = (event.timestamp.toFloat() - initialTime) * 0.000000001F
+        if (timeSinceBegan < 10) return
+        gyroBegun = true
+
+        // Average the accMagOrientation over the first 10 seconds to be used in the gyro initialization
+        accMagOrientationAverage[0] = accMagOrientationSum[0] / accMagOrientationCount
+        accMagOrientationAverage[1] = accMagOrientationSum[1] / accMagOrientationCount
+        accMagOrientationAverage[2] = accMagOrientationSum[2] / accMagOrientationCount
+
 
         // initialisation of the gyroscope based rotation matrix
         if (initState) {
             var initMatrix: FloatArray? = FloatArray(9)
-            initMatrix = getRotationMatrixFromOrientation(accMagOrientation)
+            initMatrix = getRotationMatrixFromOrientation(accMagOrientationAverage)
             val test = FloatArray(3)
             SensorManager.getOrientation(initMatrix, test)
             gyroMatrix = matrixMultiplication(gyroMatrix, initMatrix)
@@ -269,14 +329,14 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
         // copy the new gyro values into the gyro array
         // convert the raw gyro data into a rotation vector
         val deltaVector = FloatArray(4)
-        if (timestamp != 0f) {
-            val dT = (event.timestamp - timestamp) * NS2S
+        if (gyroTimestamp != 0f) {
+            val dT = (event.timestamp - gyroTimestamp) * NS2S
             System.arraycopy(event.values, 0, gyro, 0, 3)
             getRotationVectorFromGyro(gyro, deltaVector, dT / 2.0f)
         }
 
         // measurement done, save current time for next interval
-        timestamp = event.timestamp.toFloat()
+        gyroTimestamp = event.timestamp.toFloat()
 
         // convert rotation vector into rotation matrix
         val deltaMatrix = FloatArray(9)
@@ -414,4 +474,29 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
     }
     // END Code from Paul Lawitzki
 
+    private fun calculateWorldMovement(event: SensorEvent) {
+        // phone linear accelerations, need to be corrected for orientation
+        val xAcceleration = event.values[0]
+        val yAcceleration = event.values[1]
+        val zAcceleration = event.values[2]
+
+        // current phone orientation angles, used to correct the above accelerations
+        val cosX = cos(fusedOrientation[1])
+        val cosY = cos(fusedOrientation[2])
+        val cosZ = cos(fusedOrientation[0])
+        val sinX = sin(fusedOrientation[1])
+        val sinY = sin(fusedOrientation[2])
+        val sinZ = sin(fusedOrientation[0])
+
+        // calculating the acceleration of the phone compared to the world axis
+        // The z World Acc can be disregarded for now as we are only moving along a given floor, but may be needed later
+        val xWorldAcceleration = xAcceleration * (cosZ + cosY) + yAcceleration * sinZ + zAcceleration * sinY
+        val yWorldAcceleration = yAcceleration * (cosZ + cosX) + zAcceleration * sinX - xAcceleration * sinZ
+        val zWorldAcceleration = zAcceleration * (cosX + cosY) - xAcceleration * sinY - yAcceleration * sinX
+
+        // add new accelerations to the running sum to be averaged later and increase the count of total measurements
+        worldAccelerationSumArray[0] += xWorldAcceleration
+        worldAccelerationSumArray[1] += yWorldAcceleration
+        worldAccelerationSumArray[2] += zWorldAcceleration
+    }
 }
