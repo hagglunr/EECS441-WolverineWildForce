@@ -114,8 +114,8 @@ class PathGenerator {
     fun getNodes(building: String) : ArrayList<Node> {
         var nodes = ArrayList<Node>()
         // Get all node info from building via request to our server
-        val completion: () -> Unit = null
-        val url = "https://"+serverURL+"/getnodes/?building="+building as String
+        val completion: (() -> Unit)? = null
+        val url = "https://52.14.13.109/getnodes/?building=" + building as String
         val getRequest = JsonObjectRequest(url,
             { response ->
                 val infoReceived = try {
@@ -143,8 +143,14 @@ class PathGenerator {
                         )
                     )
                 }
-                completion()
-            }, { completion() }
+                if (completion != null) {
+                    completion()
+                }
+            }, {
+                if (completion != null) {
+                    completion()
+                }
+            }
         )
         return nodes
     }
