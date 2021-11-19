@@ -74,8 +74,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
     var PointMode: Boolean = false
     var MoveMode: Boolean = true
     var LineMode: Boolean = false
-    val serverUrl: String = "https://52.14.13.109/"
-    private lateinit var queue: RequestQueue
+
 
     init {
         view = v
@@ -149,11 +148,10 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
             //}
 
         }
-        /*
+
         for (i in 0 until building.Connections.Connections.size) {
-            customLines.add(building.Connections.Connections[i])
+            //customLines.add(building.Connections.Connections[i])
         }
-        */
 
 
 
@@ -195,7 +193,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
     override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
 
 
-        postPoint(0, "Test", view.context)
+
         mapTextureHandle = loadMapTexture(map)
         val metrics: DisplayMetrics = view.context.getResources().getDisplayMetrics()
 
@@ -278,7 +276,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
 
 
         // user
-        synchronized(this) {
+
             redLoc = GLES20.glGetUniformLocation(initialProgram, "red")
             GLES20.glUniform1f(redLoc, 10f)
             GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, buffCPUMemory)
@@ -287,7 +285,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
 
 
             GLES20.glDrawElements(GLES20.GL_LINES, (customLines.size/2) * 2, GLES20.GL_UNSIGNED_INT, indexBuffer )
-        }
+
         err = GLES20.glGetError()
 
     }
@@ -329,10 +327,11 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         var orthoProj: Geometry.Matrix
         synchronized(this) {
             orthoProj = geo.orthoProj(r, l, t, b, 100f, .5f)
+            drawMap(orthoProj)
+            drawPoints(orthoProj)
+
         }
 
-        drawMap(orthoProj)
-        drawPoints(orthoProj)
 
     }
 
@@ -540,26 +539,28 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
 
     }
 
-    fun postPoint(index: Int, buildingName: String, ctx:Context ) {
-        val connectionsObj = JSONArray(listOf(0))
-        val jsonObj = mapOf(
-            "building_name" to buildingName,
-            "name" to "t",
-            "id" to 1,
-            "type" to "t",
-            "floor" to 2,
-            "coordinates" to JSONArray(listOf(customPoints[index*4],  customPoints[index*4+1])),
-            "neighbors" to JSONArray(listOf(0))
-        )
-        val postReq = JsonObjectRequest(Request.Method.POST, serverUrl + "postnodes/",
-            JSONObject( jsonObj),   { Log.d("postmaps", "chatt posted!") },
-            { error -> Log.e("postmaps", error.localizedMessage ?: "JsonObjectRequest error") }
-        )
-        if (!this::queue.isInitialized) {
-            queue = Volley.newRequestQueue(ctx)
+    fun getPoints(): FloatArray {
+        synchronized(this) {
+            return customPoints.toFloatArray()
         }
-        queue.add(postReq)
+
     }
+
+    fun getConnections(): IntArray {
+        synchronized(this) {
+            return customLines.toIntArray()
+        }
+
+    }
+
+    fun clear() {
+        synchronized(this) {
+            customPoints.clear()
+            customLines.clear()
+        }
+    }
+
+
 
 
 

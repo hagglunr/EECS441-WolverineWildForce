@@ -30,6 +30,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.FileInputStream
+import kotlin.math.sqrt
 
 
 class DisplayActivity: AppCompatActivity(), SensorEventListener {
@@ -42,6 +43,8 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     var firstValue: Float = -1f
     val stepLength: Float = 10f
     var sensor: Sensor? = null
+    val serverUrl: String = "https://52.14.13.109/"
+    private lateinit var queue: RequestQueue
 
 
     init {
@@ -55,15 +58,21 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         val fileName: String? = extras?.getString("buildingFile")
         val intarr = extras?.getIntegerArrayList("connections")
         val nodes: DoubleArray?= extras?.getDoubleArray("nodes")
+        val buildingName: String = extras?.getString("buildingName") as String
         val inStream: FileInputStream = this.openFileInput(fileName)
         var bmp: Bitmap = BitmapFactory.decodeStream(inStream)
         inStream.close()
         if (nodes == null || intarr == null) finish()
         val intArr = intarr as ArrayList<Int>
-        // TODO DO NOT HARDCODE THIS BUT PUT IN DB
+        var flNodes: FloatArray
+        if (buildingName[0] == 'f') {
+            flNodes = scaleDoubles(nodes as DoubleArray )
+        }
+        else {
+            flNodes = scaleDoubles(nodes as DoubleArray, -83.716537, 42.2926866,  -83.716103, 42.29279955,
+                29.318f, 549.536f, 37.166f, 204.9336f)
+        }
 
-        val flNodes = scaleDoubles(nodes as DoubleArray, -83.716537, 42.2926866,  -83.716103, 42.29279955,
-        29.318f, 549.536f, 37.166f, 204.9336f)
 
 
 
@@ -118,6 +127,15 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             view.setPointMode(false)
             view.setMoveMode(false)
             view.setDragMode(true)
+        }
+        buttonView.Post.setOnClickListener {
+            val points = view.renderer.getPoints()
+            val lines = view.renderer.getConnections()
+            postPoints(points, lines, buildingName  )
+        }
+
+        buttonView.Clear.setOnClickListener {
+            view.renderer.clear()
         }
     }
 
@@ -178,8 +196,8 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
         var fArr: ArrayList<Float> = ArrayList()
         for (i in 0 until f.size/2) {
-            val tdx = invLerp(x1, x2, f[i*2+1]) //long first
-            val tdy = invLerp(y1, y2, f[i*2])
+            val tdx = invLerp(x1, x2, f[i*2]) //long first
+            val tdy = invLerp(y1, y2, f[i*2+1])
             val txf = tdx.toFloat()
             val tyf = tdy.toFloat()
             val xf = lerp(x1f, x2f, txf)
@@ -193,6 +211,73 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         return fArr.toFloatArray()
 
 
+    }
+
+    fun scaleDoubles(f: DoubleArray): FloatArray {
+        var fArr: ArrayList<Float> = ArrayList()
+        for (i in 0 until f.size/2) {
+            fArr.add(f[i*2].toFloat())
+            fArr.add(f[i*2 + 1].toFloat())
+            fArr.add(-5f)
+            fArr.add(1f)
+        }
+        return fArr.toFloatArray()
+    }
+
+    fun dist(points: FloatArray, i1: Int, i2: Int) : Float {
+        val f1x = points[i1*4]
+        val f1y = points[i1*4 + 1]
+        val f2x = points[i2*4]
+        val f2y = points[i2*4 + 1]
+        return sqrt((f2x - f1x)*(f2x - f1x) + (f2y - f1y)*(f2y - f1y))
+    }
+
+    fun adjacencyMatrix(customPoints: FloatArray, connections: IntArray): Array<FloatArray>{
+        val adjacencyMatrix: Array<FloatArray> = (Array<FloatArray>(customPoints.size) {FloatArray(customPoints.size/4){ 10000000f}})
+        for (i in 0 until connections.size/2) {
+            adjacencyMatrix[connections[i*2]][connections[i*2 + 1]] = dist(customPoints, connections[i*2], connections[i*2+1])
+            adjacencyMatrix[connections[i*2 + 1]][connections[i*2]] = dist(customPoints, connections[i*2], connections[i*2+1])
+        }
+        return adjacencyMatrix
+    }
+
+    // Make the connections into an adjacency matrix
+    fun postPoints(customPoints: FloatArray, connections: IntArray, buildingName: String) {
+        val adjMatrix = adjacencyMatrix(customPoints, connections)
+        for (i in 0 until customPoints.size/4) {
+            val flanders: ArrayList<Int> = ArrayList<Int>()
+            adjMatrix[i][i] = 0f
+            for (j in 0 until adjMatrix[i].size) {
+                if (adjMatrix[i][j] < 1000000f) {
+                    flanders.add(j)
+                    System.out.print(j)
+                    System.out.print(" ")
+                }
+            }
+            System.out.print("\n")
+            postPoint(i, buildingName, applicationContext, customPoints, flanders.toIntArray() )
+        }
+    }
+
+    fun postPoint(index: Int, buildingName: String, ctx:Context, customPoints: FloatArray, neighbors: IntArray ) {
+        val connectionsObj = JSONArray(listOf(0))
+        val jsonObj = mapOf(
+            "building_name" to buildingName,
+            "name" to "t",
+            "id" to 1,
+            "type" to "t",
+            "floor" to 2,
+            "coordinates" to JSONArray(listOf(customPoints[index*4+1],  customPoints[index*4])),
+            "neighbors" to JSONArray(neighbors)
+        )
+        val postReq = JsonObjectRequest(Request.Method.POST, serverUrl + "postnodes/",
+            JSONObject( jsonObj),   { Log.d("postmaps", "chatt posted!") },
+            { error -> Log.e("postmaps", error.localizedMessage ?: "JsonObjectRequest error") }
+        )
+        if (!this::queue.isInitialized) {
+            queue = Volley.newRequestQueue(ctx)
+        }
+        queue.add(postReq)
     }
 
 

@@ -26,8 +26,9 @@ class DebugActivity : AppCompatActivity() {
     val serverUrl: String = "https://52.14.13.109/"
     lateinit var queue: RequestQueue
     lateinit var mostRecent: JSONArray
-    @Volatile var handledReq: Boolean = false
-    var reqComplete: Boolean = false
+    var handledReq: Boolean = false
+    @Volatile var reqComplete: Boolean = false
+    val buildingName = "BBB"
     fun getNodes(building: String, context: Context, completion: () -> Unit) {
         val getRequest = JsonObjectRequest(serverUrl + "getnodes/?building=" + building,
             { response ->
@@ -36,7 +37,7 @@ class DebugActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT).show();
                 handledReq = true
                 val nodesReceived = try {
-                    response.getJSONArray("BBB")
+                    response.getJSONArray(buildingName)
                 } catch (e: JSONException) {
 
                     JSONArray()
@@ -47,8 +48,8 @@ class DebugActivity : AppCompatActivity() {
                     val neighbors = if (chattEntry[7] == JSONObject.NULL) null else chattEntry[7] as JSONArray
                     if (chattEntry.length() == 8) {
 
-                        nodes.add(((chattEntry[6]).toString()).toDouble()) // long
-                        nodes.add(((chattEntry[5]).toString()).toDouble()) // latitude
+                        nodes.add(((chattEntry[5]).toString()).toDouble()) // long
+                        nodes.add(((chattEntry[6]).toString()).toDouble()) // latitude
                         if (neighbors != null) {
                             for (j in 0 until neighbors.length()) {
                                 val flanders = neighbors[j].toString().toInt()
@@ -106,7 +107,7 @@ class DebugActivity : AppCompatActivity() {
         val th: Thread = Thread(Runnable() {
             var intent: Intent =Intent(this, DisplayActivity::class.java)
 
-            getNodes("BBB", context = applicationContext, {
+            getNodes(buildingName, context = applicationContext, {
                 runOnUiThread {
                     setComplete()
                 }
@@ -125,6 +126,7 @@ class DebugActivity : AppCompatActivity() {
             extras.putIntegerArrayList("connections", conns)
             extras.putString("buildingFile", "bbb.png")
             extras.putDoubleArray("nodes", buildingNodes.toDoubleArray() )
+            extras.putString("buildingName", buildingName)
             intent.putExtras(extras)
             val stream = this.openFileOutput("bbb.png", Context.MODE_PRIVATE)
             img.compress(Bitmap.CompressFormat.PNG, 100, stream)
