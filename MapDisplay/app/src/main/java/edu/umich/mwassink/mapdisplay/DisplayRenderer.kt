@@ -22,10 +22,17 @@ import java.util.ArrayList
 import android.view.WindowManager
 import android.content.res.TypedArray
 import android.text.method.MovementMethod
+import android.util.Log
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.ViewConfiguration
+import com.android.volley.toolbox.JsonObjectRequest
+import org.json.JSONArray
 import kotlin.math.sqrt
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.Volley
+import org.json.JSONObject
 
 
 class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Renderer {
@@ -44,8 +51,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
     var t: Float
     var b: Float
     var bufferName: Int
-    var numVertices: Int
-    var vertices: FloatArray
+
     var scaleFactor: Float
     var transLeft: Float
     var transUp: Float
@@ -68,6 +74,8 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
     var PointMode: Boolean = false
     var MoveMode: Boolean = true
     var LineMode: Boolean = false
+
+
     init {
         view = v
         ctr = 0
@@ -126,15 +134,27 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         map = building.Texture
         userPos = floatArrayOf(200f, 200f, -5f, 1f) // replace
         mapTextureHandle = -1
-        vertices =  building.Connections.Nodes
-        numVertices = building.Connections.Nodes.size / 4 //4 per point
+
         pictureVertices = floatArrayOf(0f, heightPicture, defaultDepth, 1f, widthPicture, 0f, defaultDepth, 1f,
             0f, 0f, defaultDepth, 1f,
             0f, heightPicture, defaultDepth, 1f,
             widthPicture, 0f, defaultDepth, 1f,
             widthPicture, heightPicture, defaultDepth, 1f)
-        customPoints = arrayListOf(200f, 200f, -5f, 1f)
-        customLines = arrayListOf()
+        customPoints = ArrayList<Float>()
+        customLines = ArrayList<Int>()
+        for (i in 0 until building.Connections.Nodes.size) {
+            //if (i >= 16 && i < 20) {
+                customPoints.add(building.Connections.Nodes[i])
+            //}
+
+        }
+
+        for (i in 0 until building.Connections.Connections.size) {
+            //customLines.add(building.Connections.Connections[i])
+        }
+
+
+
 
 
     }
@@ -172,6 +192,8 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
 
     override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
 
+
+
         mapTextureHandle = loadMapTexture(map)
         val metrics: DisplayMetrics = view.context.getResources().getDisplayMetrics()
 
@@ -180,10 +202,19 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         realHeight = view.height.toFloat()
 
         ratio = metrics.heightPixels.toFloat() / metrics.widthPixels.toFloat()
+        // TODO change this back to normal
+
         r = 1000f
         l = 0f
         b = 0f
         t = 1000f  * ratio
+
+        /*
+        l = 0f
+        b = 0f
+        r = widthPicture
+        t = heightPicture
+        */
         //t = 1000f
         GLES20. glClearColor(1.0f, 1.0f, 1.0f, 1f)
         var err: Int = GLES20.glGetError()
@@ -193,12 +224,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         mapTextureProgram = createShader(vertexTexture, pixelTexture)
         orthoMatrixLocation = GLES20.glGetUniformLocation(initialProgram, "orthoProj")
 
-        val indexBuffer: IntBuffer = IntBuffer.allocate(1)
-        GLES20.glGenBuffers(1, indexBuffer)
-        pointBuffer = indexBuffer[0]
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, pointBuffer)
-        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 4*4*numVertices, arrToBuffer(vertices, 4*numVertices*4), GLES20.GL_STATIC_DRAW  )
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
+
 
         val texturePointBuffer: IntBuffer = IntBuffer.allocate(1)
         GLES20.glGenBuffers(1, texturePointBuffer)
@@ -250,7 +276,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
 
 
         // user
-        synchronized(this) {
+
             redLoc = GLES20.glGetUniformLocation(initialProgram, "red")
             GLES20.glUniform1f(redLoc, 10f)
             GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, buffCPUMemory)
@@ -259,7 +285,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
 
 
             GLES20.glDrawElements(GLES20.GL_LINES, (customLines.size/2) * 2, GLES20.GL_UNSIGNED_INT, indexBuffer )
-        }
+
         err = GLES20.glGetError()
 
     }
@@ -301,10 +327,11 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         var orthoProj: Geometry.Matrix
         synchronized(this) {
             orthoProj = geo.orthoProj(r, l, t, b, 100f, .5f)
+            drawMap(orthoProj)
+            drawPoints(orthoProj)
+
         }
 
-        drawMap(orthoProj)
-        drawPoints(orthoProj)
 
     }
 
@@ -499,6 +526,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
             val ty = invLerp(0f, realHeight, y)
             customPoints.set(index*4, lerp(l, r, tx) )
             customPoints.set(index*4 + 1, lerp(t, b, ty) )
+
         }
     }
 
@@ -510,6 +538,29 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         }
 
     }
+
+    fun getPoints(): FloatArray {
+        synchronized(this) {
+            return customPoints.toFloatArray()
+        }
+
+    }
+
+    fun getConnections(): IntArray {
+        synchronized(this) {
+            return customLines.toIntArray()
+        }
+
+    }
+
+    fun clear() {
+        synchronized(this) {
+            customPoints.clear()
+            customLines.clear()
+        }
+    }
+
+
 
 
 

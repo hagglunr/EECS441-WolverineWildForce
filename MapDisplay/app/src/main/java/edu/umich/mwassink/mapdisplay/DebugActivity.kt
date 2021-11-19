@@ -7,8 +7,74 @@ import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import java.io.InputStream
+import java.net.URL
+import android.R.string.no
+import android.util.Log
+import android.widget.Toast
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
+
 
 class DebugActivity : AppCompatActivity() {
+    var nodes =  arrayListOf<Double>()
+    var connections = arrayListOf<Int>()
+    val serverUrl: String = "https://52.14.13.109/"
+    lateinit var queue: RequestQueue
+    lateinit var mostRecent: JSONArray
+    var handledReq: Boolean = false
+    @Volatile var reqComplete: Boolean = false
+    val buildingName = "BBB"
+    fun getNodes(building: String, context: Context, completion: () -> Unit) {
+        val getRequest = JsonObjectRequest(serverUrl + "getnodes/?building=" + building,
+            { response ->
+                nodes.clear()
+                Toast.makeText(context, "Handling request",
+                    Toast.LENGTH_SHORT).show();
+                handledReq = true
+                val nodesReceived = try {
+                    response.getJSONArray(buildingName)
+                } catch (e: JSONException) {
+
+                    JSONArray()
+                }
+                for (i in 0 until nodesReceived.length()) {
+                    val chattEntry = nodesReceived[i] as JSONArray
+                    mostRecent = nodesReceived[i] as JSONArray
+                    val neighbors = if (chattEntry[7] == JSONObject.NULL) null else chattEntry[7] as JSONArray
+                    if (chattEntry.length() == 8) {
+
+                        nodes.add(((chattEntry[5]).toString()).toDouble()) // long
+                        nodes.add(((chattEntry[6]).toString()).toDouble()) // latitude
+                        if (neighbors != null) {
+                            for (j in 0 until neighbors.length()) {
+                                val flanders = neighbors[j].toString().toInt()
+                                connections.add(i)
+                                connections.add(flanders)
+                            }
+                        }
+                    } else {
+                        Toast.makeText(context, "Wrong length expected 8 got " + chattEntry.length().toString(),
+                            Toast.LENGTH_SHORT).show();
+                    }
+                }
+                completion()
+            }, { completion() }
+        )
+
+        if (!this::queue.isInitialized) {
+            queue = Volley.newRequestQueue(context)
+        }
+        queue.add(getRequest)
+    }
+
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_debug)
@@ -28,17 +94,49 @@ class DebugActivity : AppCompatActivity() {
         */
     }
 
+    fun setComplete() {
+        synchronized(this) {
+            reqComplete = true
+        }
+    }
+
 
     fun launchGL(v: View) {
-        var intent: Intent =Intent(this, DisplayActivity::class.java)
-        var img = BitmapFactory.decodeResource(applicationContext.resources, R.drawable.ic_action_bbb, BitmapFactory.Options() )
-        intent.putExtra("buildingFile", "bbb.png")
-        val stream = this.openFileOutput("bbb.png", Context.MODE_PRIVATE)
-        img.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        stream.close()
-        img.recycle()
 
-        startActivity(intent)
+
+        val th: Thread = Thread(Runnable() {
+            var intent: Intent =Intent(this, DisplayActivity::class.java)
+
+            getNodes(buildingName, context = applicationContext, {
+                runOnUiThread {
+                    setComplete()
+                }
+            })
+            var complete = false
+            while (!complete) {
+                synchronized(this) {
+                    complete = reqComplete
+                }
+            }
+            var buildingNodes = nodes
+            var conns = connections
+            var iStream = (URL("https://52.14.13.109/media/BBB_1_glrqG87.jpeg").content) as InputStream
+            var img = BitmapFactory.decodeStream(iStream)
+            var extras: Bundle = Bundle()
+            extras.putIntegerArrayList("connections", conns)
+            extras.putString("buildingFile", "bbb.png")
+            extras.putDoubleArray("nodes", buildingNodes.toDoubleArray() )
+            extras.putString("buildingName", buildingName)
+            intent.putExtras(extras)
+            val stream = this.openFileOutput("bbb.png", Context.MODE_PRIVATE)
+            img.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            stream.close()
+            img.recycle()
+
+            startActivity(intent)
+        })
+        th.start()
+
     }
 
     fun launchWalk(v: View) {
