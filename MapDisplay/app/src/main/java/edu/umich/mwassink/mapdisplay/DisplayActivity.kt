@@ -24,12 +24,12 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
     lateinit var view: DisplayView
     // lateinit var sensorManager: SensorManager
     var steps: Float = 0f
-    var sensorOn = false
     // TODO need to experiment with this
     val stepLength: Float = 10f
     var sensor: Sensor? = null
     var initialTime: Float = -1F
     var gyroBegun: Boolean = false
+    var stepCounterBegun: Boolean = false
 
     // Code taken from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
     private var mSensorManager: SensorManager?  = null
@@ -121,14 +121,14 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
         // END Code from Paul Lawitzki
     }
 
-
+/*
     override fun onResume() {
         super.onResume()
 
 //        TODO: Check if I need this code or not
 //        TODO: may need to call initListeners here again
     }
-
+*/
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         // Let the ScaleGestureDetector inspect all events.
@@ -166,6 +166,7 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
             // TODO measure how long this is, I may have to change my method for gathering direction if is short
             // Might just need to gather accelerations until steps are taken, then reset
         )
+        sensor = mSensorManager!!.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
     }
 
     // Code taken from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
@@ -198,6 +199,7 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
                 System.arraycopy(event.values, 0, magnet, 0, 3)
             }
             Sensor.TYPE_STEP_COUNTER -> {
+                if (!gyroBegun) return
                 stepCounterEvent(event)
             }
         }
@@ -207,9 +209,14 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
 
     fun stepCounterEvent(event: SensorEvent) {
+        if (!stepCounterBegun) {
+            stepCounterBegun = true
+            steps = event.values[0]
+            return
+        }
 
         var prevSteps = steps
-        if (sensorOn && sensor != null) {
+        if (sensor != null) {
             steps = event.values[0]
             val newSteps = steps - prevSteps
 
@@ -269,6 +276,8 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
         // Wait 10 seconds at the beginning for the phone to realize its position in the world
         // Ideally this will be while the user is outside a building and away from artificial electromagnetic fields
         val timeSinceBegan: Float = (event.timestamp.toFloat() - initialTime) * 0.000000001F
+        // TODO: should probably make this a shorter time as the user moving the phone could skew data
+        // Might have to add something to the display to have the user hold the phone still to calibrate
         if (timeSinceBegan < 10) return
         gyroBegun = true
 
