@@ -46,7 +46,6 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     var steps: Float = 0f
     var sensorOn = false
     var firstValue: Float = -1f
-    var sensor: Sensor? = null
     val serverUrl: String = "https://52.14.13.109/"
     private lateinit var queue: RequestQueue
   
