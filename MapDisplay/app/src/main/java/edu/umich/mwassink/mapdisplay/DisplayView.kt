@@ -6,31 +6,50 @@ import android.graphics.BitmapFactory
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.GLUtils
+import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
+import android.widget.Toast
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import org.json.JSONArray
+import org.json.JSONException
+import kotlin.math.sqrt
 
-class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
+
+class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
     val renderer: DisplayRenderer
     var scale: Float
-    lateinit var mScaleDetector: ScaleGestureDetector
-    lateinit var scaleListener: ScaleGestureDetector.SimpleOnScaleGestureListener
-    lateinit var gestureListener: GestureDetector.SimpleOnGestureListener
-    lateinit var gestureDetector: GestureDetector
+    var mScaleDetector: ScaleGestureDetector
+    var scaleListener: ScaleGestureDetector.SimpleOnScaleGestureListener
+    var gestureListener: GestureDetector.SimpleOnGestureListener
+    var gestureDetector: GestureDetector
     var transRight: Float
     var transUp: Float
     var scaleFactor: Float
     var textureHandle = -1
+
+
+    var trackLines: Boolean = false
+    var drag: Boolean = false
+    var l1: Int = -1
+    var l2: Int = -1
+
+    var lastX: Float = -1f
+    var lastY: Float = -1f
+
     init {
         super.setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
         setEGLContextClientVersion(2)
         setPreserveEGLContextOnPause(true)
-        renderer = DisplayRenderer(this)
-        setRenderer(renderer)
+
         scale = 1f
         scaleFactor = 1f
         transRight = 0f
         transUp = 0f
+
 
 
         scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -41,7 +60,7 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
                 scaleFactor *= detector.scaleFactor
 
                 // Don't let the object get too small or too large.
-                scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 5.0f))
+                scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 15.0f))
 
                 return true
             }
@@ -63,6 +82,10 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
 
         gestureDetector = GestureDetector(context, gestureListener)
 
+        renderer = DisplayRenderer(this, building)
+        setRenderer(renderer)
+
+
     }
 
 
@@ -70,6 +93,39 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
 
     override fun onTouchEvent(ev: MotionEvent): Boolean{
         println("touch changed")
+
+
+        var x: Float = ev.getX()
+        var y: Float = ev.getY()
+        var dx: Float = lastX - x
+        var dy: Float = lastY - y
+
+        if (sqrt((dx)*(dx) + dy*dy) > 25f)
+        lastX = x
+        lastY = y
+        renderer.addPoint(x, y)
+
+        if (trackLines) {
+            if (l1 == -1) {
+                l1 = renderer.ClosestPoint(x, y)
+            } else {
+                l2 = renderer.ClosestPoint(x, y)
+                if (l2 == l1) {
+
+                }
+                else {
+
+
+                    renderer.addLine(l1, l2)
+                    l1 = -1
+                    l2 = -1
+                }
+            }
+        } else if (drag) {
+            val cp = renderer.ClosestPoint(x, y)
+            renderer.SetPoint(cp, x, y)
+        }
+        println(java.lang.String.format("Event at (%f, %f)", x, y))
 
         mScaleDetector.onTouchEvent(ev)
         gestureDetector.onTouchEvent(ev)
@@ -85,6 +141,45 @@ class DisplayView (ctx: Context) : GLSurfaceView(ctx) {
 
     fun changePos(dx: Float, dy: Float) {
         renderer.changePos(dx, dy)
+    }
+
+
+
+
+
+    // If I have a bunch of 2D points, then I can encode them in a different form with an s and a t value
+    // based off of some min and max points and interpolation
+    // e.g min (25, 25), max (50, 75)... 45, 50 -> .8, .5
+    fun interpArray(minX: Double, maxX: Double, minY: Double, maxY: Double, interleavedPoints: DoubleArray): FloatArray {
+        System.exit(1)
+        var f: FloatArray = FloatArray(interleavedPoints.size)
+        return f
+
+
+    }
+
+    fun setMoveMode(what: Boolean) {
+        renderer.SetMoveMode(what)
+
+    }
+
+    fun setPointMode(what: Boolean) {
+        renderer.SetPointMode(what)
+
+    }
+
+    fun setLineMode(what: Boolean) {
+        renderer.SetLineMode(what)
+        trackLines = what
+        if (!trackLines) {
+            l1 = -1
+            l2 = -1
+        }
+
+    }
+
+    fun setDragMode(what: Boolean) {
+        drag = what
     }
 
 

@@ -22,5 +22,7 @@ urlpatterns = [
     path('postnodes/', views.postnodes, name='postnodes'),
     path('getbuildings/', views.getbuildings, name='getbuildings'),
     path('getrooms/', views.getrooms, name='getrooms'),
+    path('getfloorplans/', views.getfloorplans, name='getfloorplans'),
+    path('postfloorplans/', views.postfloorplans, name='postfloorplans'),
     path('admin/', admin.site.urls),
 ]

@@ -1,59 +1,99 @@
 package edu.umich.mwassink.mapdisplay
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.android.volley.toolbox.Volley.newRequestQueue
+import edu.umich.mwassink.mapdisplay.BuildingInfoStore.buildingRoomMap
+import edu.umich.mwassink.mapdisplay.BuildingInfoStore.getBuildings
+import edu.umich.mwassink.mapdisplay.DebugActivity
+import edu.umich.mwassink.mapdisplay.R
 import edu.umich.mwassink.mapdisplay.databinding.ActivityMainBinding
+import org.json.JSONArray
+import org.json.JSONObject
+import org.json.JSONException
 
 class MainActivity : AppCompatActivity() {
-
     private lateinit var view: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         view = ActivityMainBinding.inflate(layoutInflater)
-//        view.root.setBackgroundColor(
-//            Color.parseColor("#3399FF"))
         setContentView(view.root)
 
-        view.buildingSpinnerView.setAdapter(ArrayAdapter<String>(this,
-                                            android.R.layout.simple_spinner_item,
-                                            resources.getStringArray(R.array.buildings)))
+        if (buildingRoomMap.isEmpty()) {
+            fetchBuildingInfo()
+        }
+        else {
+            createSearchView()
+        }
+    }
 
-        view.roomSpinnerView.setAdapter(ArrayAdapter(this,
-                                        android.R.layout.simple_spinner_item,
-                                        arrayOf<String>()))
+    private fun fetchBuildingInfo() {
+        getBuildings(applicationContext) {
+            // Just for demonstrating the update of the room options when building change, remove after testing
+            buildingRoomMap["PIER"] = arrayListOf<String>("ENGR 101 Lab B505", "ENGR 101 Lab B507", "Barnes and Noble Bookstore", "Blue Market")
+            createSearchView()
+        }
+    }
 
-        view.buildingSpinnerView.onItemSelectedListener = object :  AdapterView.OnItemSelectedListener {
+    private fun createSearchView() {
+        val buildingSpinnerViewAdapter = ArrayAdapter<String>(this,
+            android.R.layout.simple_spinner_item,
+            (buildingRoomMap.keys).toCollection(ArrayList<String>()))
+        view.buildingSearchableSpinner.adapter = buildingSpinnerViewAdapter
+        view.buildingSearchableSpinner.setTitle("Select Building");
+        view.buildingSearchableSpinner.setPositiveButton("OK");
+
+        view.buildingSearchableSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val building = resources.getStringArray(R.array.buildings)[p2]
-                val building_id = resources.getIdentifier(building, "array", this@MainActivity.getPackageName())
-                Toast.makeText(applicationContext, "Building $building selected", Toast.LENGTH_SHORT).show()
-                view.roomSpinnerView.setAdapter(ArrayAdapter(this@MainActivity,
-                                                android.R.layout.simple_spinner_item,
-                                                resources.getStringArray(building_id)))
+                val selectedBuilding = view.buildingSearchableSpinner.getSelectedItem().toString()
+                var rooms = arrayListOf<String>()
+                if (buildingRoomMap[selectedBuilding] != null) {
+                    rooms = buildingRoomMap[selectedBuilding]!!
+                }
+                view.roomsSearchableSpinner.adapter = ArrayAdapter<String>(this@MainActivity,
+                    android.R.layout.simple_spinner_item,
+                    rooms)
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
             }
         }
+        view.roomsSearchableSpinner.setTitle("Select Rooms");
+        view.roomsSearchableSpinner.setPositiveButton("OK");
+        createArrivalButton()
+    }
 
+    private fun createArrivalButton() {
         view.searchButton.setOnClickListener {
-            val building = view.buildingSpinnerView.getSelectedItem().toString()
-            val room = view.roomSpinnerView.getSelectedItem().toString()
-            Toast.makeText(applicationContext, "Searching $building $room ...", Toast.LENGTH_SHORT).show()
+            val building = view.buildingSearchableSpinner.getSelectedItem().toString()
+
+            if (view.roomsSearchableSpinner.getSelectedItem() != null) {
+                val room = view.roomsSearchableSpinner.getSelectedItem().toString()
+                Toast.makeText(applicationContext, "Searching $building $room ...", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, DebugActivity::class.java))
+            }
         }
 
         view.arriveButton.setOnClickListener {
-            val inflater: LayoutInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            val inflater: LayoutInflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
             val popupView = inflater.inflate(R.layout.arrival, null)
 
             val popupWindow = PopupWindow(
@@ -71,14 +111,8 @@ class MainActivity : AppCompatActivity() {
 
             val returnButton = popupView.findViewById<Button>(R.id.returnButton)
             returnButton.setOnClickListener{
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
+                startActivity(Intent(this, MainActivity::class.java))
             }
         }
-
-        view.searchButton.setOnClickListener {
-            startActivity(Intent(this, DebugActivity::class.java))
-        }
-
     }
 }

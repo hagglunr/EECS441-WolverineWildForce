@@ -1,8 +1,11 @@
 package edu.umich.mwassink.mapdisplay
 
 import android.content.Context
+import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Point
 import android.opengl.GLES20
 import android.opengl.GLES30
 import android.opengl.GLSurfaceView
@@ -15,14 +18,26 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL
 import javax.microedition.khronos.opengles.GL10
 import android.util.DisplayMetrics
+import java.util.ArrayList
+import android.view.WindowManager
+import android.content.res.TypedArray
+import android.text.method.MovementMethod
+import android.util.Log
+import android.view.KeyCharacterMap
+import android.view.KeyEvent
+import android.view.ViewConfiguration
+import com.android.volley.toolbox.JsonObjectRequest
+import org.json.JSONArray
+import kotlin.math.sqrt
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.Volley
+import org.json.JSONObject
 
 
-
-
-class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
+class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Renderer {
     var view: GLSurfaceView;
-    var width: Int
-    var height: Int
+
     var ctr: Int
     var vertexShader: String
     var pixelShader: String
@@ -36,8 +51,7 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     var t: Float
     var b: Float
     var bufferName: Int
-    var numVertices: Int
-    var vertices: FloatArray
+
     var scaleFactor: Float
     var transLeft: Float
     var transUp: Float
@@ -51,10 +65,19 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     var mapTextureHandle = -1
     var ratio: Float
     var userPos: FloatArray
+    var initializedFully = false
+    var map: Bitmap
+    var customPoints: ArrayList<Float>
+    var customLines: ArrayList<Int>
+    var realHeight: Float = 0f
+    var realWidth: Float = 0f
+    var PointMode: Boolean = false
+    var MoveMode: Boolean = true
+    var LineMode: Boolean = false
+
+
     init {
         view = v
-        width = 0
-        height = 0
         ctr = 0
         vertexShader =  "uniform mat4 orthoProj;" +
                 "attribute vec4 pos;" +
@@ -100,30 +123,39 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         t = 1000f
         ratio = 1f
         bufferName = -1
-        numVertices = 2
+
 
 
         scaleFactor = 1f
         transLeft = 0f
         transUp = 0f
-        heightPicture = 628f
-        widthPicture = 1093f
-        userPos = floatArrayOf(200f, 200f, -5f, 1f)
-        vertices =  floatArrayOf(widthPicture/2, heightPicture/2, -5f, 1f, .25f ,.25f, -5f, 1f)
-        pictureVertices = floatArrayOf(0f, heightPicture, defaultDepth, 1f,
-            widthPicture, 0f, defaultDepth, 1f,
+        heightPicture = (building.Texture.height).toFloat()
+        widthPicture =  (building.Texture.width).toFloat()
+        map = building.Texture
+        userPos = floatArrayOf(200f, 200f, -5f, 1f) // replace
+        mapTextureHandle = -1
+
+        pictureVertices = floatArrayOf(0f, heightPicture, defaultDepth, 1f, widthPicture, 0f, defaultDepth, 1f,
             0f, 0f, defaultDepth, 1f,
             0f, heightPicture, defaultDepth, 1f,
             widthPicture, 0f, defaultDepth, 1f,
             widthPicture, heightPicture, defaultDepth, 1f)
+        customPoints = ArrayList<Float>()
+        customLines = ArrayList<Int>()
+        for (i in 0 until building.Connections.Nodes.size) {
+            //if (i >= 16 && i < 20) {
+                customPoints.add(building.Connections.Nodes[i])
+            //}
+
+        }
+
+        for (i in 0 until building.Connections.Connections.size) {
+            //customLines.add(building.Connections.Connections[i])
+        }
 
 
-        /*
-        upperLeftCorner = Geometry.Vector(0f, heightPicture, defaultDepth, 1f  )
-        upperRightCorner= Geometry.Vector(widthPicture, heightPicture, defaultDepth, 1f)
-        lowerLeftCorner = Geometry.Vector(0f, 0f, defaultDepth, 1f)
-        lowerRightCorner = Geometry.Vector(widthPicture, 0f, defaultDepth, 1f)
-        */
+
+
 
     }
 
@@ -159,16 +191,31 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     }
 
     override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
-        width = view.width
-        height = view.height
-        loadMapTexture(view.context)
+
+
+
+        mapTextureHandle = loadMapTexture(map)
         val metrics: DisplayMetrics = view.context.getResources().getDisplayMetrics()
+
+
+        realWidth = view.width.toFloat()
+        realHeight = view.height.toFloat()
+
         ratio = metrics.heightPixels.toFloat() / metrics.widthPixels.toFloat()
+        // TODO change this back to normal
+
         r = 1000f
         l = 0f
         b = 0f
-        //t = 1000f  / ratio
-        t = 1000f
+        t = 1000f  * ratio
+
+        /*
+        l = 0f
+        b = 0f
+        r = widthPicture
+        t = heightPicture
+        */
+        //t = 1000f
         GLES20. glClearColor(1.0f, 1.0f, 1.0f, 1f)
         var err: Int = GLES20.glGetError()
 
@@ -177,12 +224,7 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         mapTextureProgram = createShader(vertexTexture, pixelTexture)
         orthoMatrixLocation = GLES20.glGetUniformLocation(initialProgram, "orthoProj")
 
-        val indexBuffer: IntBuffer = IntBuffer.allocate(1)
-        GLES20.glGenBuffers(1, indexBuffer)
-        pointBuffer = indexBuffer[0]
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, pointBuffer)
-        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, 4*4*numVertices, arrToBuffer(vertices, 4*numVertices*4), GLES20.GL_STATIC_DRAW  )
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
+
 
         val texturePointBuffer: IntBuffer = IntBuffer.allocate(1)
         GLES20.glGenBuffers(1, texturePointBuffer)
@@ -199,9 +241,17 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
 
     }
 
+    fun completeInit(building: Building) {
+
+        synchronized(this) {
+            initializedFully = true
+        }
+
+    }
+
     override fun onSurfaceChanged(p0: GL10?, p1: Int, p2: Int) {
 
-        GLES20.glViewport(0, 0, width, height)
+        GLES20.glViewport(0, 0, view.width, view.height)
     }
 
     fun drawPoints(orthoProj: Geometry.Matrix) {
@@ -215,31 +265,26 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         var redLoc = GLES20.glGetUniformLocation(initialProgram, "red")
         GLES20.glUniform1f(redLoc, 0f)
         GLES20.glUniformMatrix4fv(orthoMatrixLocation, 1, false, buff, 0)
-        err = GLES20.glGetError()
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, pointBuffer)
-        err = GLES20.glGetError()
 
-        // points along
-        GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, 0)
 
-        GLES20.glEnableVertexAttribArray(0)
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, numVertices-1)
-        // end
-        redLoc = GLES20.glGetUniformLocation(initialProgram, "red")
-        GLES20.glUniform1f(redLoc, 1f)
-        GLES20.glDrawArrays(GLES20.GL_LINES, 0, numVertices)
-        GLES20.glDrawArrays(GLES20.GL_POINTS, numVertices-1, 1)
         GLES20.glDisableVertexAttribArray(0)
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0)
 
-        val buffCPUMemory = arrToBuffer(userPos, 16)
+        var buffCPUMemory = arrToBuffer(customPoints.toFloatArray(), 4 * customPoints.size)
+        var indexBuffer = arrToBufferInt(customLines.toIntArray(), 4 * customLines.size)
+
 
         // user
-        redLoc = GLES20.glGetUniformLocation(initialProgram, "red")
-        GLES20.glUniform1f(redLoc, 10f)
-        GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, buffCPUMemory)
-        GLES20.glEnableVertexAttribArray(0)
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1)
+
+            redLoc = GLES20.glGetUniformLocation(initialProgram, "red")
+            GLES20.glUniform1f(redLoc, 10f)
+            GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, buffCPUMemory)
+            GLES20.glEnableVertexAttribArray(0)
+            GLES20.glDrawArrays(GLES20.GL_POINTS, 0, customPoints.size / 4)
+
+
+            GLES20.glDrawElements(GLES20.GL_LINES, (customLines.size/2) * 2, GLES20.GL_UNSIGNED_INT, indexBuffer )
 
         err = GLES20.glGetError()
 
@@ -282,12 +327,10 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         var orthoProj: Geometry.Matrix
         synchronized(this) {
             orthoProj = geo.orthoProj(r, l, t, b, 100f, .5f)
+            drawMap(orthoProj)
+            drawPoints(orthoProj)
+
         }
-
-        drawMap(orthoProj)
-        drawPoints(orthoProj)
-
-
 
 
     }
@@ -337,6 +380,10 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         var ymid = lerp(b,t, .5f)
         var xmid = lerp(l,r,.5f)
         synchronized(this) {
+            if (!MoveMode) {
+                return
+            }
+
             l = xmid - dx * ratio
             r = xmid + dx * ratio
             t = ymid + dy * ratio
@@ -347,6 +394,9 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
 
     fun changeTrans(dx: Float, dy: Float) {
          synchronized(this) {
+             if (!MoveMode) {
+                 return
+             }
              l += dx
              r += dx
              t -= dy
@@ -367,30 +417,152 @@ class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
         return b
     }
 
-    fun loadMapTexture(ctx: Context) {
-        var textureProgramBuff: IntArray= IntArray(1)
-        GLES20.glGenTextures(1, textureProgramBuff, 0)
-        mapTextureHandle = textureProgramBuff[0]
+    fun arrToBufferInt(f: IntArray, s: Int): IntBuffer {
+        val b: IntBuffer = ByteBuffer.allocateDirect(s).order(ByteOrder.nativeOrder()).asIntBuffer()
+        b.put(f)
+        b.rewind()
+        return b
+    }
 
-
+    fun loadBBBMapTexture(ctx: Context) {
         var bmp: Bitmap = BitmapFactory.decodeResource(ctx.resources, R.drawable.ic_action_bbb, BitmapFactory.Options() )
-        // Make active and set linear filtering
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D , mapTextureHandle)
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bmp, 0)
-        var err = GLES20.glGetError()
-        bmp.recycle()
-
+        mapTextureHandle = loadMapTexture(bmp)
         // unbind the texture here?
 
     }
 
+    fun loadMapTexture(bmp: Bitmap): Int {
+        var textureProgramBuff: IntArray= IntArray(1)
+        GLES20.glGenTextures(1, textureProgramBuff, 0)
+        var textureHandle = textureProgramBuff[0]
+
+
+
+        // Make active and set linear filtering
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D , textureHandle)
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bmp, 0)
+        bmp.recycle()
+        return textureHandle
+    }
+
     fun changePos(dx: Float, dy: Float) {
         synchronized(this) {
+            if (!MoveMode) {
+                return
+            }
             userPos[0] += dx
             userPos[1] += dy
         }
     }
+
+    // returns the t between them e.g [3, 6] w/ 4.5 has t = .5
+    fun invLerp(v1: Float, v2: Float, v: Float): Float {
+        return (v - v1) / (v2 - v1)
+    }
+
+    fun addPoint(x: Float, y: Float) {
+
+        synchronized(this) {
+            if (!PointMode) {
+                return
+            }
+            val metrics: DisplayMetrics = view.context.getResources().getDisplayMetrics()
+            val tx = invLerp(0f, realWidth, x)
+            val ty = invLerp(0f, realHeight, y)
+
+            customPoints.add(lerp(l, r, tx))
+            customPoints.add(lerp(t, b, ty))
+            customPoints.add(defaultDepth)
+            customPoints.add(1f)
+        }
+    }
+
+    fun SetPointMode(what: Boolean) {
+        PointMode = what
+    }
+
+    fun SetLineMode(what: Boolean) {
+        LineMode = what
+    }
+
+    fun SetMoveMode(what: Boolean) {
+        MoveMode = what
+    }
+
+    fun ClosestPoint(XIn: Float, YIn: Float): Int {
+        synchronized(this) {
+            var bestDist = 1000000f
+            var bestIndex = -1
+            val tx = invLerp(0f, realWidth, XIn)
+            val ty = invLerp(0f, realHeight, YIn)
+            val X = lerp(l, r, tx)
+            val Y = lerp(t, b, ty)
+            var i = 0
+            while (i < customPoints.size / 4) {
+                val x = customPoints[i*4 + 0]
+                val y = customPoints[i*4 + 1]
+                val dx = X - x
+                val dy = Y - y
+                // I know I do not need the sqrt...
+                if (sqrt(dx * dx + dy*dy) < bestDist) {
+                    bestDist = sqrt(dx * dx + dy * dy)
+                    bestIndex = i
+                }
+                i++
+            }
+
+            return bestIndex
+        }
+
+
+
+    }
+
+    fun SetPoint(index: Int, x: Float, y: Float) {
+        synchronized(this) {
+            val tx = invLerp(0f, realWidth, x)
+            val ty = invLerp(0f, realHeight, y)
+            customPoints.set(index*4, lerp(l, r, tx) )
+            customPoints.set(index*4 + 1, lerp(t, b, ty) )
+
+        }
+    }
+
+    // Indices into the float list
+    fun addLine(p1: Int, p2:Int) {
+        synchronized(this) {
+            customLines.add(p1)
+            customLines.add(p2)
+        }
+
+    }
+
+    fun getPoints(): FloatArray {
+        synchronized(this) {
+            return customPoints.toFloatArray()
+        }
+
+    }
+
+    fun getConnections(): IntArray {
+        synchronized(this) {
+            return customLines.toIntArray()
+        }
+
+    }
+
+    fun clear() {
+        synchronized(this) {
+            customPoints.clear()
+            customLines.clear()
+        }
+    }
+
+
+
+
+
 
 }
