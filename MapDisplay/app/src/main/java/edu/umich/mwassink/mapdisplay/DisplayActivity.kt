@@ -119,7 +119,6 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
             1000, TIME_CONSTANT
         )
         // END Code from Paul Lawitzki
-        // TODO probably need to throw something in here to reset the fused and gyro orientations every so often
     }
 
 
@@ -169,14 +168,8 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
         )
     }
 
-    // TODO delete
-//    var gyroCount: Int = 0
-//    var accCount: Int = 0
-//    var magCount: Int = 0
-
     // Code taken from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
     override fun onSensorChanged(event: SensorEvent) {
-        // Todo: Could potentially throw checks in here to make sure that the sensor moved enough
         when (event.sensor.type) {
             Sensor.TYPE_ACCELEROMETER -> {
                 // no longer need to worry about averaging the accMag orientation average if the gyro has begun
@@ -197,25 +190,12 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
             }
             Sensor.TYPE_GYROSCOPE -> {     // process gyro data
                 gyroFunction(event)
-//            Log.d("gyro", "0: " + event.values[0] + "\n1: " + event.values[1] + "\n2: " + event.values[2])
-                /*if (abs(event.values[0]) > 0.02) {
-                    Log.d("x", "over" + event.values[0])
-                }
-                if (abs(event.values[1]) > 0.02) {
-                    Log.d("y", "over" + event.values[1])
-                }
-                if (abs(event.values[2]) > 0.01) {
-                    Log.d("z", "over" + event.values[2])
-                }*/
-//                gyroCount++
-//                Log.d("gyro", " " + gyroCount + " ")
             }
             Sensor.TYPE_MAGNETIC_FIELD -> {     // copy new magnetometer data into magnet array
                 // no longer need to worry about averaging the accMag orientation average if the gyro has begun
                 if (gyroBegun) return
 
                 System.arraycopy(event.values, 0, magnet, 0, 3)
-//                calculateAccMagOrientation()
             }
             Sensor.TYPE_STEP_COUNTER -> {
                 stepCounterEvent(event)
@@ -249,6 +229,7 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
                 worldAccelerationSumArray = FloatArray(3) {0F}
             }
 
+            // Multiply the distance by the direction and send this to the display
             val xDistance = newSteps * stepLength * worldDistanceXratio
             val yDistance = newSteps * stepLength * worldDistanceYratio
             view.changePos(xDistance, yDistance) // for now
@@ -262,8 +243,6 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
     }
 
     private fun calculateAccMagOrientation() {
-//        lateinit var oldAccMagOr: FloatArray
-//        oldAccMagOr = accMagOrientation.clone()
         if (SensorManager.getRotationMatrix(rotationMatrix, null, accel, magnet)) {
             SensorManager.getOrientation(rotationMatrix, accMagOrientation)
         }
@@ -272,23 +251,6 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
         accMagOrientationSum[0] += accMagOrientation[0]
         accMagOrientationSum[1] += accMagOrientation[1]
         accMagOrientationSum[2] += accMagOrientation[2]
-//        Log.d("AccMag", "0: " + accMagOrientation[0] + "\n1: " + accMagOrientation[1] + "\n2: " + accMagOrientation[2])
-//        if (accMagOrientation[0] != 0.0F) {
-//            return
-//        }
-
-        /*
-        // 0.2 works pretty well
-        if (abs(accMagOrientation[0] - oldAccMagOr[0]) > 0.3) {
-            Log.d("z", "Changed azimuth")
-        }
-        if (abs(accMagOrientation[1] - oldAccMagOr[1]) > 0.1) {
-            Log.d("x", "Changed pitch")
-        }
-        if (abs(accMagOrientation[2] - oldAccMagOr[2]) > 0.2) {
-            Log.d("y", "Changed roll")
-        }
-    */
     }
 
 
@@ -362,7 +324,6 @@ open class DisplayActivity: AppCompatActivity(), SensorEventListener {
         val normValues = FloatArray(3)
 
         // Calculate the angular speed of the sample
-        // TODO do i need todouble and tofloat?
         val omegaMagnitude =
             sqrt((gyroValues[0] * gyroValues[0] + gyroValues[1] * gyroValues[1] + gyroValues[2] * gyroValues[2]))
 
