@@ -26,9 +26,7 @@ object NodesStore {
 
                 Log.d("getNodes", "Size of nodes: ${infoReceived.length()}")
 
-                if (completion != null) {
-                    completion()
-                }
+                completion()
             }, {
                     error -> Log.e("getNodes", error.localizedMessage ?: "JsonObjectRequest error")
             }
