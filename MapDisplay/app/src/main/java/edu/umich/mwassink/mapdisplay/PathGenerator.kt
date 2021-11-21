@@ -1,6 +1,9 @@
 package edu.umich.mwassink.mapdisplay
 
+import android.util.Log
+import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.*
@@ -111,13 +114,33 @@ class PathGenerator {
     fun getNodes(building: String) : ArrayList<Node> {
         var nodes = ArrayList<Node>()
         // Get all node info from building via request to our server
-        val completion: (() -> Unit)? = null
+        lateinit var completion: () -> Unit
         val url = "https://52.14.13.109/getnodes/?building=" + building as String
         val getRequest = JsonObjectRequest(url,
             { response ->
+                print("response")
                 val infoReceived = try {
+                    print("try")
+                    response.getJSONArray(building)
+                } catch (e:JSONException) {
+                    print("catch")
+                    JSONArray()
+                }
+                completion()
+            } , {
+                error -> Log.e("getNodes", error.localizedMessage ?: "JsonObjectRequest error")
+            }
+        )
+        print("done")
+        /*
+        val getRequest = JsonObjectRequest(url,
+            { response ->
+                print("response\n")
+                val infoReceived = try {
+                    print("try\n")
                     response.getJSONArray(building)
                 } catch (e: JSONException) {
+                    print("catch\n")
                     JSONArray()
                 }
                 for (i in 0 until infoReceived.length()) {
@@ -128,8 +151,8 @@ class PathGenerator {
                     val longitude = coords[1].toString().toDouble()
                     val neighborsarray = JSONArray(nodeinfo[3])
                     var neighbors = ArrayList<Int>()
-                    for (i in 0 until neighborsarray.length()) {
-                        neighbors.add(neighborsarray[i].toString().toInt())
+                    for (j in 0 until neighborsarray.length()) {
+                        neighbors.add(neighborsarray[j].toString().toInt())
                     }
                     nodes.add(
                         Node(
@@ -140,15 +163,13 @@ class PathGenerator {
                         )
                     )
                 }
-                if (completion != null) {
-                    completion()
-                }
+                completion()
             }, {
-                if (completion != null) {
-                    completion()
-                }
+                print("failed\n")
+                completion()
             }
         )
+        */
         return nodes
     }
 }
