@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity() {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val building = resources.getStringArray(R.array.buildings)[p2]
                 val building_id = resources.getIdentifier(building, "array", this@MainActivity.getPackageName())
-                Toast.makeText(applicationContext, "Building $building selected", Toast.LENGTH_SHORT).show()
+                // Toast.makeText(applicationContext, "Building $building selected", Toast.LENGTH_SHORT).show()
                 view.roomSpinnerView.setAdapter(ArrayAdapter(this@MainActivity,
                                                 android.R.layout.simple_spinner_item,
                                                 resources.getStringArray(building_id)))
@@ -49,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         view.searchButton.setOnClickListener {
             val building = view.buildingSpinnerView.getSelectedItem().toString()
             val room = view.roomSpinnerView.getSelectedItem().toString()
-            Toast.makeText(applicationContext, "Searching $building $room ...", Toast.LENGTH_SHORT).show()
+            // Toast.makeText(applicationContext, "Searching $building $room ...", Toast.LENGTH_SHORT).show()
         }
 
         view.arriveButton.setOnClickListener {
@@ -78,6 +79,14 @@ class MainActivity : AppCompatActivity() {
 
         view.searchButton.setOnClickListener {
             startActivity(Intent(this, DebugActivity::class.java))
+        }
+
+        view.nodeTester.setOnClickListener {
+
+            NodesStore.getNodes(applicationContext, "BBB") {
+                Log.d("getNodes", "getNodes completed!")
+            }
+
         }
     }
 }
