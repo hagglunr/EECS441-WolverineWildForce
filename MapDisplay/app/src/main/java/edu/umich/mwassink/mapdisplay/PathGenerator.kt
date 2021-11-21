@@ -1,12 +1,8 @@
 package edu.umich.mwassink.mapdisplay
 
-import android.util.Log
-import com.android.volley.Request
-import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import org.json.JSONArray
 import org.json.JSONException
-import org.json.JSONObject
 
 class PathGenerator {
     // Use the A* algorithm
