@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 val building = resources.getStringArray(R.array.buildings)[p2]
                 val building_id = resources.getIdentifier(building, "array", this@MainActivity.getPackageName())
-                Toast.makeText(applicationContext, "Building $building selected", Toast.LENGTH_SHORT).show()
+                // Toast.makeText(applicationContext, "Building $building selected", Toast.LENGTH_SHORT).show()
                 view.roomSpinnerView.setAdapter(ArrayAdapter(this@MainActivity,
                                                 android.R.layout.simple_spinner_item,
                                                 resources.getStringArray(building_id)))
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 //            startActivity(Intent(this, DebugActivity::class.java))
             val building = view.buildingSpinnerView.getSelectedItem().toString()
             val room = view.roomSpinnerView.getSelectedItem().toString()
-            Toast.makeText(applicationContext, "Searching $building $room ...", Toast.LENGTH_SHORT).show()
+            // Toast.makeText(applicationContext, "Searching $building $room ...", Toast.LENGTH_SHORT).show()
             val i = Intent(this, NavigationActivity::class.java)
             i.putExtra("building", building)
             i.putExtra("room", room)
