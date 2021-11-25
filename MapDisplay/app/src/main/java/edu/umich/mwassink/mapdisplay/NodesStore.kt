@@ -46,7 +46,7 @@ object NodesStore {
 //                    val coords = JSONArray(nodeinfo[3])
                     val longitude = nodeinfo[5].toString().toDouble()
                     val latitude = nodeinfo[6].toString().toDouble()
-                    val neighborsarray = nodeinfo[7]
+                    val neighborsarray = nodeinfo[7] as JSONArray
                     var neighbors = ArrayList<Int>()
                     for (j in 0 until neighborsarray.length()) {
                         neighbors.add(neighborsarray.getJSONObject(j).toString().toInt())
