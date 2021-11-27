@@ -98,31 +98,33 @@ class NavigationActivity : AppCompatActivity() {
         }
 
         view.repositionButton.setOnClickListener {
-            val inflater: LayoutInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-            val popupView = inflater.inflate(R.layout.reposition_tutorial, null)
-
-            val popupWindow = PopupWindow(
-                popupView,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-
-            popupWindow.showAtLocation(
-                view.repositionButton, // Location to display popup window
-                Gravity.CENTER, // Exact position of layout to display popup
-                0, // X offset
-                0 // Y offset
-            )
-
-            val reposTutorialOKbutton = popupView.findViewById<Button>(R.id.reposTutorialOKbutton)
-            reposTutorialOKbutton.setOnClickListener{
-                val intent = Intent(this, NavigationActivity::class.java)
-                intent.putExtra("building", building)
-                intent.putExtra("room", room)
-                startActivity(intent)
+            if (view.repositionButton.text == "Reposition") {
+                createRepositionPopupWindow()
             }
+            transition(it)
         }
     }
 
+    private fun createRepositionPopupWindow() {
+        val inflater: LayoutInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val popupView = inflater.inflate(R.layout.reposition_tutorial, null)
 
+        val popupWindow = PopupWindow(
+            popupView,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+
+        popupWindow.showAtLocation(
+            view.repositionButton, // Location to display popup window
+            Gravity.CENTER, // Exact position of layout to display popup
+            0, // X offset
+            0 // Y offset
+        )
+
+        val reposTutorialOKbutton = popupView.findViewById<Button>(R.id.reposTutorialOKbutton)
+        reposTutorialOKbutton.setOnClickListener{
+            popupWindow.dismiss()
+        }
+    }
 }
