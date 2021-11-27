@@ -19,7 +19,10 @@ import android.util.DisplayMetrics
 
 
 
-class DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
+class
+
+
+DisplayRenderer(v: GLSurfaceView) : GLSurfaceView.Renderer {
     var view: GLSurfaceView;
     var width: Int
     var height: Int

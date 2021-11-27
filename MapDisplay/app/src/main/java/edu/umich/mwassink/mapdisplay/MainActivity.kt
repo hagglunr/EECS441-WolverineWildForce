@@ -74,6 +74,7 @@ class MainActivity : AppCompatActivity() {
             val room = view.roomSpinnerView.getSelectedItem().toString()
             // Toast.makeText(applicationContext, "Searching $building $room ...", Toast.LENGTH_SHORT).show()
             val i = Intent(this, NavigationActivity::class.java)
+            // val i = Intent(this, DebugActivity::class.java)
             i.putExtra("building", building)
             i.putExtra("room", room)
             startActivity(i)
