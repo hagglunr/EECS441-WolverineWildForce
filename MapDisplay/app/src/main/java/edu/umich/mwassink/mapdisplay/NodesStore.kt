@@ -49,7 +49,13 @@ object NodesStore {
                     val neighborsarray = nodeinfo[7] as JSONArray
                     var neighbors = ArrayList<Int>()
                     for (j in 0 until neighborsarray.length()) {
-                        neighbors.add(neighborsarray.getJSONObject(j).toString().toInt())
+                        /* I just changed the .getJSONObject(j) to the regular bracket index since
+                        the value inside was already an int it seems. */
+
+//                        neighbors.add(neighborsarray.getJSONObject(j).toString().toInt())
+                        val testObject = neighborsarray[j]
+                        val testInt = testObject.toString().toInt()
+                        neighbors.add(testInt)
                     }
                     nodes.add(
                         Node(
