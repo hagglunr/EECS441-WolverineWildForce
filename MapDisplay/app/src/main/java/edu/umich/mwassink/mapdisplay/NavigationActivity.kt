@@ -8,14 +8,12 @@ import android.util.Log
 import android.view.View
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.PopupWindow
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import edu.umich.mwassink.mapdisplay.NavigationActivity.NavigationState.*
 import edu.umich.mwassink.mapdisplay.databinding.ActivityMainBinding
 import edu.umich.mwassink.mapdisplay.databinding.ActivityNavigationBinding
+import com.travijuu.numberpicker.library.NumberPicker
 
 class NavigationActivity : AppCompatActivity() {
 
@@ -27,6 +25,35 @@ class NavigationActivity : AppCompatActivity() {
     private var currState: NavigationState = BROWSING
     private lateinit var building: String
     private lateinit var room: String
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        view = ActivityNavigationBinding.inflate(layoutInflater)
+        setContentView(view.root)
+
+        building = getIntent().getExtras()?.getString("building").toString()
+        room = getIntent().getExtras()?.getString("room").toString()
+
+        view.destination.text = "$building $room"
+        view.startButton.setOnClickListener{
+            transition(it)
+        }
+        view.repositionButton.setOnClickListener{
+            transition(it)
+        }
+        view.exitButton.setOnClickListener{
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+        view.repositionButton.setOnClickListener {
+            transition(it)
+        }
+
+        // TODO: set the range of the floors based on the building the app is navigating the user to
+        view.floorPicker.setMin(1)
+        view.floorPicker.setMax(4)
+        hideFloorSelector()
+    }
 
     private fun showStart() {
         view.startButton.visibility = Button.VISIBLE
@@ -41,6 +68,14 @@ class NavigationActivity : AppCompatActivity() {
     private fun showRepositionDone() {
         view.repositionButton.text = "Done"
         view.repositionButton.setBackgroundColor(Color.parseColor("#6EE14F"))
+    }
+    private fun showFloorSelector() {
+        view.currentFloorHeader.visibility = TextView.VISIBLE
+        view.floorPicker.visibility = NumberPicker.VISIBLE
+    }
+    private fun hideFloorSelector() {
+        view.currentFloorHeader.visibility = TextView.INVISIBLE
+        view.floorPicker.visibility = NumberPicker.INVISIBLE
     }
     private fun transition(clickedButton: View) {
         with (clickedButton as Button) {
@@ -59,8 +94,10 @@ class NavigationActivity : AppCompatActivity() {
                             BROWSING -> { currState = REPONSITIONING_B }
                             NAVIGATING -> { currState = REPONSITIONING_N }
                         }
+                        createRepositionPopupWindow()
                         hideStart()
                         showRepositionDone()
+                        showFloorSelector()
                     }
                     else {
                         when (currState) {
@@ -68,43 +105,12 @@ class NavigationActivity : AppCompatActivity() {
                             REPONSITIONING_N -> { currState = NAVIGATING }
                         }
                         showReposition()
+                        hideFloorSelector()
                     }
                 }
             }
         }
     }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        view = ActivityNavigationBinding.inflate(layoutInflater)
-        setContentView(view.root)
-
-        building = getIntent().getExtras()?.getString("building").toString()
-        room = getIntent().getExtras()?.getString("room").toString()
-
-        view.destination.text = "$building $room"
-
-        view.startButton.setOnClickListener{
-            transition(it)
-        }
-
-        view.repositionButton.setOnClickListener{
-            transition(it)
-        }
-
-        view.exitButton.setOnClickListener{
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-        }
-
-        view.repositionButton.setOnClickListener {
-            if (view.repositionButton.text == "Reposition") {
-                createRepositionPopupWindow()
-            }
-            transition(it)
-        }
-    }
-
     private fun createRepositionPopupWindow() {
         val inflater: LayoutInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val popupView = inflater.inflate(R.layout.reposition_tutorial, null)
