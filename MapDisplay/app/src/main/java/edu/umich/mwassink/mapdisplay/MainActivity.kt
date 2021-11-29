@@ -81,15 +81,16 @@ class MainActivity : AppCompatActivity() {
         view.searchButton.setOnClickListener {
             startActivity(Intent(this, DebugActivity::class.java))
         }
-
+/*
         view.nodeTester.setOnClickListener {
 
             // Below is for testing the implementation of A* algorithm
             NodesStore.getNodes(applicationContext, "BBB") {
                 Log.d("getNodes", "getNodes completed!")
             }
+
+            print("nodes size: " + NodesStore.nodes.size + "\n")
             val allNodes = NodesStore.nodes
-            print("Number of nodes: " + allNodes.size + "\n")
 
             val pathGen = PathGenerator()
             val fastestPath = pathGen.getFastestPath("BBB", allNodes[0] as Node, allNodes[allNodes.size-1] as Node)
@@ -97,7 +98,7 @@ class MainActivity : AppCompatActivity() {
             for (i in 0 until fastestPath.size) {
                 print(fastestPath[i].id as String + ", ")
             }
-
         }
+*/
     }
 }

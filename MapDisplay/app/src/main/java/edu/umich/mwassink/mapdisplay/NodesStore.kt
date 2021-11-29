@@ -7,6 +7,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONException
+import org.json.JSONObject
 import java.util.ArrayList
 
 object NodesStore {
@@ -14,10 +15,9 @@ object NodesStore {
     val nodes = arrayListOf<Node>()
 
     fun getNodes(context: Context, building: String, completion: () -> Unit) {
-
-        Log.d("getNodes", "Starting getNodes")
+        nodes.clear()
         val url = "https://52.14.13.109/getnodes/?building=" + building as String
-        val getRequest = JsonObjectRequest(url,
+        var getRequest = JsonObjectRequest(url,
             { response ->
                 val infoReceived = try {
                     response.getJSONArray(building)
@@ -72,7 +72,6 @@ object NodesStore {
                             neighbors = neighbors
                         )
                     )
-                    Log.d("getNodes", "Received new node")
                 }
                 completion()
             }, {
@@ -93,7 +92,5 @@ object NodesStore {
             queue = Volley.newRequestQueue(context)
         }
         queue.add(getRequest)
-
-        Log.d("getNodes", "Ending getNodes")
     }
 }
