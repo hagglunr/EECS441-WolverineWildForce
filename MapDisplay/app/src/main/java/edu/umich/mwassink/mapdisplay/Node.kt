@@ -6,9 +6,10 @@ import kotlin.math.sqrt
 
 enum class NodeType (val type: String) {
     ENTRANCE ("Entrance"),
-    HALLWAY ("Hallway"),
+    PATH ("Path"),
     RESTROOM ("Restroom"),
-    STAIRCASE ("Staircase")
+    STAIRCASE ("Staircase"),
+    ROOM ("Room")
 }
 
 open class Node (
@@ -40,5 +41,26 @@ open class Node (
             return 0.0
         }
         return abs(this.latitude - endNode.latitude) + abs(this.longitude - endNode.longitude)
+    }
+
+    fun print() {
+        print("Node $name:\n")
+        print("ID: $id\n")
+        print("Type: $type\n")
+        print("Coords: ($latitude, $longitude)\n")
+        print("Floor: $floorNum\n")
+        print("Neighbors: ")
+        printNeighbors()
+    }
+
+    private fun printNeighbors() {
+        if (this.neighbors == null) {
+            print("None\n")
+        }
+        print("[")
+        for (i in 0 until this.neighbors!!.size) {
+            print(i as String + " ")
+        }
+        print("]\n")
     }
 }

@@ -3,6 +3,7 @@ package edu.umich.mwassink.mapdisplay
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Path
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -83,8 +84,18 @@ class MainActivity : AppCompatActivity() {
 
         view.nodeTester.setOnClickListener {
 
+            // Below is for testing the implementation of A* algorithm
             NodesStore.getNodes(applicationContext, "BBB") {
                 Log.d("getNodes", "getNodes completed!")
+            }
+            val allNodes = NodesStore.nodes
+            print("Number of nodes: " + allNodes.size + "\n")
+
+            val pathGen = PathGenerator()
+            val fastestPath = pathGen.getFastestPath("BBB", allNodes[0] as Node, allNodes[allNodes.size-1] as Node)
+            print("Order of Nodes:\n")
+            for (i in 0 until fastestPath.size) {
+                print(fastestPath[i].id as String + ", ")
             }
 
         }

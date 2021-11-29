@@ -15,6 +15,7 @@ object NodesStore {
 
     fun getNodes(context: Context, building: String, completion: () -> Unit) {
 
+        Log.d("getNodes", "Starting getNodes")
         val url = "https://52.14.13.109/getnodes/?building=" + building as String
         val getRequest = JsonObjectRequest(url,
             { response ->
@@ -34,13 +35,16 @@ object NodesStore {
                         type = NodeType.ENTRANCE
                     }
                     else if (typeStr == "Staircase") {
-                        type = NodeType.RESTROOM
+                        type = NodeType.STAIRCASE
                     }
-                    else if (typeStr == "Hallway") {
-                        type = NodeType.RESTROOM
+                    else if (typeStr == "Path") {
+                        type = NodeType.PATH
                     }
                     else if (typeStr == "Restroom") {
                         type = NodeType.RESTROOM
+                    }
+                    else if (typeStr == "Room") {
+                        type = NodeType.ROOM
                     }
                     floorNum = nodeinfo[4].toString().toInt()
 //                    val coords = JSONArray(nodeinfo[3])
@@ -68,6 +72,7 @@ object NodesStore {
                             neighbors = neighbors
                         )
                     )
+                    Log.d("getNodes", "Received new node")
                 }
                 completion()
             }, {
@@ -88,5 +93,7 @@ object NodesStore {
             queue = Volley.newRequestQueue(context)
         }
         queue.add(getRequest)
+
+        Log.d("getNodes", "Ending getNodes")
     }
 }
