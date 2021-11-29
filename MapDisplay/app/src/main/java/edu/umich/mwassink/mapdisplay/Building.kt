@@ -7,10 +7,12 @@ import android.widget.Toast
 import java.io.*
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
+import kotlin.math.floor
 
 class Building {
     var Connections: Connections
     lateinit var Texture: Bitmap
+    var floorNum: Int = -1
     //var userX: Float
     //var userY: Float
 
@@ -20,13 +22,15 @@ class Building {
 
     }
 
-    constructor(conns: Connections, texture: Bitmap)  {
+    constructor(conns: Connections, texture: Bitmap, fn: Int)  {
         Connections = conns
         Texture = texture
+        floorNum = fn
     }
 
-    constructor(nodeFileName: String, textureFileName: String, context: Context ){
+    constructor(nodeFileName: String, textureFileName: String, context: Context, fn: Int ){
         ReadLocalFile(nodeFileName, textureFileName, context)
+        floorNum = fn
     }
 
     fun ReadLocalFile(nodeFileName: String, textureFileName: String, context: Context) {

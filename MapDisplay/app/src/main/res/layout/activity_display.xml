@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_gravity="bottom"
+    tools:context=".DisplayActivity">
 
     <Button
         android:id="@+id/PointMode"
@@ -39,29 +41,55 @@
         android:id="@+id/Reposition"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#76FF7C"
         android:text="Reposition"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/PointMode" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.055"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/Post"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="10dp"
         android:text="Post"
-        app:layout_constraintStart_toEndOf="@+id/Reposition"
-        app:layout_constraintTop_toBottomOf="@+id/LinesMode" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/PointMode" />
 
     <Button
         android:id="@+id/Clear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="10dp"
         android:text="Clear"
         app:layout_constraintStart_toEndOf="@+id/Post"
-        app:layout_constraintTop_toBottomOf="@+id/MoveMode" />
+        app:layout_constraintTop_toBottomOf="@id/LinesMode" />
+
+    <Button
+        android:id="@+id/UpButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="UP"
+        app:icon="@android:drawable/arrow_up_float"
+        app:layout_constraintBottom_toTopOf="@+id/DownButton"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/DownButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="20dp"
+        android:text="Down"
+        android:textSize="10sp"
+        android:visibility="invisible"
+        app:icon="@android:drawable/arrow_down_float"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,11 +1,13 @@
 package edu.umich.mwassink.mapdisplay
 
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.GLUtils
+import android.text.InputType
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -17,6 +19,14 @@ import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONException
 import kotlin.math.sqrt
+import android.widget.EditText
+import android.content.DialogInterface
+
+
+
+
+
+
 
 
 class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
@@ -30,10 +40,12 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
     var transUp: Float
     var scaleFactor: Float
     var textureHandle = -1
+    var roomMap: MutableMap<Int, String> = mutableMapOf<Int, String>()
 
 
     var trackLines: Boolean = false
     var drag: Boolean = false
+    var annotate: Boolean = false
     var l1: Int = -1
     var l2: Int = -1
 
@@ -103,7 +115,7 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
         if (sqrt((dx)*(dx) + dy*dy) > 25f)
         lastX = x
         lastY = y
-        renderer.addPoint(x, y)
+
 
         if (trackLines) {
             if (l1 == -1) {
@@ -124,6 +136,32 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
         } else if (drag) {
             val cp = renderer.ClosestPoint(x, y)
             renderer.SetPoint(cp, x, y)
+        } else if (renderer.PointMode) {
+
+
+            var txt = ""
+            //https://stackoverflow.com/questions/10903754/input-text-dialog-android
+            var bob = AlertDialog.Builder(context)
+            val input = EditText(context)
+            input.inputType = InputType.TYPE_CLASS_TEXT
+            bob.setView(input)
+            bob.setPositiveButton("OK",
+                DialogInterface.OnClickListener {
+                        dialog,
+                        which ->
+                    txt = input.text.toString()
+                synchronized(this) {
+
+                    renderer.addPoint(x, y)
+                    val cp = renderer.ClosestPoint(x,y)
+                    roomMap[cp] = txt
+
+                }})
+            bob.setNegativeButton("Cancel",
+                DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+
+            bob.show()
+
         }
         println(java.lang.String.format("Event at (%f, %f)", x, y))
 
@@ -181,6 +219,8 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
     fun setDragMode(what: Boolean) {
         drag = what
     }
+
+
 
 
 }

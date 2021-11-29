@@ -150,7 +150,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         }
 
         for (i in 0 until building.Connections.Connections.size) {
-            //customLines.add(building.Connections.Connections[i])
+            customLines.add(building.Connections.Connections[i])
         }
 
 

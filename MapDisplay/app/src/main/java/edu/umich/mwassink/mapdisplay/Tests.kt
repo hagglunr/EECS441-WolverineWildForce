@@ -12,7 +12,7 @@ fun DefaultBuilding(ctx: Context): Building {
     var vs : FloatArray= floatArrayOf((bmp.width/2).toFloat(), (bmp.height/2).toFloat(), -5f, 1f, .25f ,.25f, -5f, 1f)
     var indices: IntArray = intArrayOf(0, 1)
     var conns: Connections = Connections(vs, indices)
-    var building: Building = Building(conns, bmp)
+    var building: Building = Building(conns, bmp, 1)
     return building
 }
 
@@ -20,5 +20,5 @@ fun DefaultConnections(bmp: Bitmap): Building {
     var vs : FloatArray= floatArrayOf((bmp.width/2).toFloat(), (bmp.height/2).toFloat(), -5f, 1f, .25f ,.25f, -5f, 1f)
     var indices: IntArray = intArrayOf(0, 1)
     var conns: Connections = Connections(vs, indices)
-    return Building(conns, bmp)
+    return Building(conns, bmp,1 )
 }

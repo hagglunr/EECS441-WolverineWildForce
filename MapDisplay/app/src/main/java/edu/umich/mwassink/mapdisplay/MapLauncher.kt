@@ -18,18 +18,20 @@ import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import kotlin.math.floor
 
 
-class DebugActivity : AppCompatActivity() {
+class MapLauncher : AppCompatActivity() {
     var nodes =  arrayListOf<Double>()
     var connections = arrayListOf<Int>()
     val serverUrl: String = "https://52.14.13.109/"
     lateinit var queue: RequestQueue
     lateinit var mostRecent: JSONArray
     var handledReq: Boolean = false
-    @Volatile var reqComplete: Boolean = false
-    val buildingName = "BBB"
-    fun getNodes(building: String, context: Context, completion: () -> Unit) {
+    @Volatile var reqComplete: Int = 0
+    var buildingName = ""
+    var floorURL = ""
+    fun getNodes(building: String, floorNum: Int,  context: Context, completion: () -> Unit) {
         val getRequest = JsonObjectRequest(serverUrl + "getnodes/?building=" + building,
             { response ->
                 nodes.clear()
@@ -48,15 +50,18 @@ class DebugActivity : AppCompatActivity() {
                     val neighbors = if (chattEntry[7] == JSONObject.NULL) null else chattEntry[7] as JSONArray
                     if (chattEntry.length() == 8) {
 
-                        nodes.add(((chattEntry[5]).toString()).toDouble()) // long
-                        nodes.add(((chattEntry[6]).toString()).toDouble()) // latitude
-                        if (neighbors != null) {
-                            for (j in 0 until neighbors.length()) {
-                                val flanders = neighbors[j].toString().toInt()
-                                connections.add(i)
-                                connections.add(flanders)
+                        if (chattEntry[4].toString().toInt() == floorNum) {
+                            nodes.add(((chattEntry[5]).toString()).toDouble()) // long
+                            nodes.add(((chattEntry[6]).toString()).toDouble()) // latitude
+                            if (neighbors != null) {
+                                for (j in 0 until neighbors.length()) {
+                                    val flanders = neighbors[j].toString().toInt()
+                                    connections.add(i)
+                                    connections.add(flanders)
+                                }
                             }
                         }
+
                     } else {
                         Toast.makeText(context, "Wrong length expected 8 got " + chattEntry.length().toString(),
                             Toast.LENGTH_SHORT).show();
@@ -72,83 +77,92 @@ class DebugActivity : AppCompatActivity() {
         queue.add(getRequest)
     }
 
+    fun getMediaURL(building: String, floorNum: Int, context: Context, completion: () -> Unit) {
+        val getRequest = JsonObjectRequest(serverUrl + "getfloorplans/?building=" + building,
+            { response ->
+                nodes.clear()
+                Toast.makeText(context, "Fetching floor plan",
+                    Toast.LENGTH_SHORT).show();
+                val nodesReceived = try {
+                    response.getJSONArray(buildingName)
+                } catch (e: JSONException) {
+                    JSONArray()
+                }
+                for (i in 0 until nodesReceived.length()) {
+                    val chattEntry = nodesReceived[i] as JSONArray
+                    if (chattEntry.length() == 3) {
+                        if (chattEntry[1].toString().toInt() == floorNum) {
+                            floorURL = chattEntry[2].toString()
+                        }
 
+                    } else {
+                        Toast.makeText(context, "Wrong length expected 3 got " + chattEntry.length().toString(),
+                            Toast.LENGTH_SHORT).show();
+                    }
+                }
+                completion()
+            }, { completion() }
+        )
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_debug)
-
-        /*
-        BuildingDirectoryMap = LinkedHashMap<String, Building>()
-        val tempBuilding = Building
-        val tempRoom = Room
-        tempBuilding.rooms[tempRoom.number] = tempRoom
-        val tempEntry = Entry
-        tempBuilding.entries[tempEntry.id] = tempEntry
-        BuildingDirectoryMap[tempBuilding.name] = tempBuilding
-
-        // Data to be passed in is tempBuilding. Then we can access all the information we need from there
-        // tempBuilding.rooms["1670]  .x or .y
-        // tembBuilding.entries["1"]  .x or .y
-        */
+        if (!this::queue.isInitialized) {
+            queue = Volley.newRequestQueue(context)
+        }
+        queue.add(getRequest)
     }
+
 
     fun setComplete() {
         synchronized(this) {
-            reqComplete = true
+            reqComplete += 1
         }
     }
 
 
-    fun launchGL(v: View) {
+    fun launchGL(s: String, ctx: Context, floorNum: Int) {
 
-
+        buildingName = s
+        //buildingName = s + 1.toString()
         val th: Thread = Thread(Runnable() {
-            var intent: Intent =Intent(this, DisplayActivity::class.java)
+            var intent: Intent =Intent(ctx, DisplayActivity::class.java)
 
-            getNodes(buildingName, context = applicationContext, {
+            getNodes(buildingName, floorNum, context = ctx, {
                 runOnUiThread {
                     setComplete()
                 }
             })
-            var complete = false
-            while (!complete) {
+            getMediaURL(buildingName, floorNum,  context =  ctx, {
+                runOnUiThread {
+                    setComplete()
+                }
+            })
+            var complete = 0
+            while (complete != 2) {
                 synchronized(this) {
                     complete = reqComplete
                 }
             }
+
             var buildingNodes = nodes
             var conns = connections
-            var iStream = (URL("https://52.14.13.109/media/BBB_1_glrqG87.jpeg").content) as InputStream
+
+            var iStream = (URL(floorURL).content) as InputStream
             var img = BitmapFactory.decodeStream(iStream)
             var extras: Bundle = Bundle()
             extras.putIntegerArrayList("connections", conns)
             extras.putString("buildingFile", "bbb.png")
             extras.putDoubleArray("nodes", buildingNodes.toDoubleArray() )
             extras.putString("buildingName", buildingName)
+            extras.putInt("floorNum", floorNum)
             intent.putExtras(extras)
-            val stream = this.openFileOutput("bbb.png", Context.MODE_PRIVATE)
+            val stream = ctx.openFileOutput("bbb.png", Context.MODE_PRIVATE)
             img.compress(Bitmap.CompressFormat.PNG, 100, stream)
             stream.close()
             img.recycle()
 
-            startActivity(intent)
+            ctx.startActivity(intent)
         })
         th.start()
 
     }
 
-    fun launchWalk(v: View) {
-
-        startActivity(Intent(this, WalkActivity::class.java))
-    }
-    
-    fun launchGPS(v: View) {
-        startActivity(Intent(this, GPSActivity::class.java))
-    }
-
-    fun launchSearch(v: View) {
-        //startActivity(Intent(this, MainActivity::class.java))
-    }
 }

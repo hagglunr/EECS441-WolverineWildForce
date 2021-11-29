@@ -25,7 +25,7 @@
             android:label="@string/display"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name=".DebugActivity"
+            android:name=".MapLauncher"
             android:label="@string/display"
             android:parentActivityName=".MainActivity" />
         <activity

@@ -98,7 +98,8 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     val FILTER_COEFFICIENT = 1.0f
     private val fuseTimer = Timer()
     // END Code from Paul Lawitzki
-
+    var floorNum = -1
+    var numPoints: Int = 0
 
     init {
 
@@ -112,13 +113,16 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         val intarr = extras?.getIntegerArrayList("connections")
         val nodes: DoubleArray?= extras?.getDoubleArray("nodes")
         val buildingName: String = extras?.getString("buildingName") as String
+        floorNum = extras?.getInt("floorNum")
         val inStream: FileInputStream = this.openFileInput(fileName)
         var bmp: Bitmap = BitmapFactory.decodeStream(inStream)
         inStream.close()
         if (nodes == null || intarr == null) finish()
         val intArr = intarr as ArrayList<Int>
+        numPoints = nodes?.size as Int
+        numPoints /= 2
         var flNodes: FloatArray
-        if (buildingName[0] == 'f') {
+        if (buildingName != "BBB") {
             flNodes = scaleDoubles(nodes as DoubleArray )
         }
         else {
@@ -131,14 +135,14 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
 
         val conns: Connections = Connections(flNodes, intArr.toIntArray())
-        val building: Building = Building(conns, bmp )
+        val building: Building = Building(conns, bmp, floorNum)
 
         view = DisplayView(this, building)
         setContentView(view)
 
         buttonView = ActivityDisplayBinding.inflate(layoutInflater)
         addContentView(buttonView.root,
-            ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+            ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
 
 
 
@@ -172,12 +176,14 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             view.setPointMode(false)
             view.setMoveMode(false)
             view.setDragMode(false)
+
         }
         buttonView.PointMode.setOnClickListener {
             view.setLineMode(false)
             view.setPointMode(true)
             view.setMoveMode(false)
             view.setDragMode(false)
+
         }
 
         buttonView.MoveMode.setOnClickListener {
@@ -185,6 +191,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             view.setPointMode(false)
             view.setMoveMode(true)
             view.setDragMode(false)
+
         }
 
         buttonView.Reposition.setOnClickListener {
@@ -192,15 +199,23 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             view.setPointMode(false)
             view.setMoveMode(false)
             view.setDragMode(true)
+
         }
         buttonView.Post.setOnClickListener {
             val points = view.renderer.getPoints()
             val lines = view.renderer.getConnections()
-            postPoints(points, lines, buildingName  )
+            postPoints(points, lines, buildingName, view.roomMap)
+
         }
 
         buttonView.Clear.setOnClickListener {
             view.renderer.clear()
+        }
+
+        buttonView.UpButton.setOnClickListener {
+            val launcher: MapLauncher =  MapLauncher()
+            launcher.launchGL(buildingName, this, floorNum+1)
+
         }
         
         
@@ -637,7 +652,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     }
 
     // Make the connections into an adjacency matrix
-    fun postPoints(customPoints: FloatArray, connections: IntArray, buildingName: String) {
+    fun postPoints(customPoints: FloatArray, connections: IntArray, buildingName: String, ptMap: MutableMap<Int, String>) {
         val adjMatrix = adjacencyMatrix(customPoints, connections)
         for (i in 0 until customPoints.size/4) {
             val flanders: ArrayList<Int> = ArrayList<Int>()
@@ -650,18 +665,21 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
                 }
             }
             System.out.print("\n")
-            postPoint(i, buildingName, applicationContext, customPoints, flanders.toIntArray() )
+            if (i >= numPoints) {
+                postPoint(i, buildingName, applicationContext, customPoints, flanders.toIntArray(), ptMap )
+            }
+
         }
     }
 
-    fun postPoint(index: Int, buildingName: String, ctx:Context, customPoints: FloatArray, neighbors: IntArray ) {
+    fun postPoint(index: Int, buildingName: String, ctx:Context, customPoints: FloatArray, neighbors: IntArray, ptMap: MutableMap<Int, String> ) {
         val connectionsObj = JSONArray(listOf(0))
         val jsonObj = mapOf(
             "building_name" to buildingName,
-            "name" to "t",
-            "id" to 1,
-            "type" to "t",
-            "floor" to 2,
+            "name" to ptMap[index],
+            "id" to -1,
+            "type" to "Room",
+            "floor" to floorNum,
             "coordinates" to JSONArray(listOf(customPoints[index*4+1],  customPoints[index*4])),
             "neighbors" to JSONArray(neighbors)
         )

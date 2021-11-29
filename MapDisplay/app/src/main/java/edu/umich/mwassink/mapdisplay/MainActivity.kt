@@ -1,32 +1,15 @@
 package edu.umich.mwassink.mapdisplay
 
-import android.app.Application
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
-import com.android.volley.Request
-import com.android.volley.RequestQueue
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
-import com.android.volley.toolbox.Volley.newRequestQueue
 import edu.umich.mwassink.mapdisplay.BuildingInfoStore.buildingRoomMap
 import edu.umich.mwassink.mapdisplay.BuildingInfoStore.getBuildings
-import edu.umich.mwassink.mapdisplay.DebugActivity
-import edu.umich.mwassink.mapdisplay.R
 import edu.umich.mwassink.mapdisplay.databinding.ActivityMainBinding
-import org.json.JSONArray
-import org.json.JSONObject
-import org.json.JSONException
 
 class MainActivity : AppCompatActivity() {
     private lateinit var view: ActivityMainBinding
@@ -86,9 +69,10 @@ class MainActivity : AppCompatActivity() {
             val building = view.buildingSearchableSpinner.getSelectedItem().toString()
 
             if (view.roomsSearchableSpinner.getSelectedItem() != null) {
+                val launcher = MapLauncher()
                 val room = view.roomsSearchableSpinner.getSelectedItem().toString()
                 Toast.makeText(applicationContext, "Searching $building $room ...", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, DebugActivity::class.java))
+                launcher.launchGL(building, this, 1)
             }
         }
 
