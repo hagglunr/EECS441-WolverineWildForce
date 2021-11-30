@@ -15,14 +15,22 @@ import android.widget.Toast
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.ArrayList
+import kotlin.coroutines.CoroutineContext
 import kotlin.math.floor
 
 
-class MapLauncher : AppCompatActivity() {
+class MapLauncher : AppCompatActivity(), CoroutineScope {
+    protected lateinit var job: Job
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.Main
     @Volatile var nodes =  arrayListOf<Double>()
     @Volatile var connections = arrayListOf<Int>()
     val serverUrl: String = "https://52.14.13.109/"
@@ -128,7 +136,21 @@ class MapLauncher : AppCompatActivity() {
 
     fun launchGL(s: String, ctx: Context, floorNum: Int, roomn: String) {
 
-        getFastestPath()
+        job = Job()
+        launch {
+            var pathGenerator = PathGenerator()
+            var updateUserLocation = UpdateUserLocation()
+            var allNodes = NodesStore.getNodes(ctx, s)
+            for (node in allNodes) {
+                node.print()
+            }
+            var entranceNode = allNodes[0]//updateUserLocation.getClosestEntrance()
+            var destinationNode = allNodes[allNodes.size - 1]
+            fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode, destinationNode)
+            for (i in 0 until fastestPath.size) {
+                connections.add(fastestPath[i].id as Int)
+            }
+        }
 
         buildingName = s
         reqComplete = 0
@@ -178,15 +200,4 @@ class MapLauncher : AppCompatActivity() {
         th.start()
     }
 
-    private suspend fun getFastestPath() {
-        var pathGenerator = PathGenerator()
-        var updateUserLocation = UpdateUserLocation()
-        var allNodes = NodesStore.getNodes(applicationContext, buildingName)
-        var entranceNode = allNodes[0]//updateUserLocation.getClosestEntrance()
-        var destinationNode = allNodes[allNodes.size - 1]
-        fastestPath = pathGenerator.getFastestPath(buildingName, allNodes, entranceNode, destinationNode)
-        for (i in 0 until fastestPath.size) {
-            connections.add(fastestPath[i].id as Int)
-        }
-    }
 }
