@@ -135,7 +135,10 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
             }
         } else if (drag) {
             val cp = renderer.ClosestPoint(x, y)
-            renderer.SetPoint(cp, x, y)
+            if (cp == 0) {
+                renderer.SetPoint(cp, x, y)
+            }
+
         } else if (renderer.PointMode) {
 
 

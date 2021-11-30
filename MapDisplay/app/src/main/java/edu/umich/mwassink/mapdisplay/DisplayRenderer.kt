@@ -281,8 +281,11 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
             GLES20.glUniform1f(redLoc, 10f)
             GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, buffCPUMemory)
             GLES20.glEnableVertexAttribArray(0)
-            GLES20.glDrawArrays(GLES20.GL_POINTS, 0, customPoints.size / 4)
-
+           //
+            GLES20.glDrawArrays(GLES20.GL_POINTS, 1, customPoints.size / 4)
+        GLES20.glUniform1f(redLoc, 1f)
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1)
+        GLES20.glUniform1f(redLoc, 10f)
 
             GLES20.glDrawElements(GLES20.GL_LINES, (customLines.size/2) * 2, GLES20.GL_UNSIGNED_INT, indexBuffer )
 

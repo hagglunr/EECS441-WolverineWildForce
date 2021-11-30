@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -12,11 +13,10 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +26,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.android.volley.toolbox.Volley.newRequestQueue
 import edu.umich.mwassink.mapdisplay.databinding.ActivityDisplayBinding
+import edu.umich.mwassink.mapdisplay.databinding.NavigateBinding
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -34,7 +35,7 @@ import kotlin.math.sqrt
 import java.util.*
 import kotlin.math.cos
 import kotlin.math.sin
-
+import com.travijuu.numberpicker.library.NumberPicker
   
 // Uses some Code from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
 // In order to fuse sensors and get more accurate readings from them
@@ -100,6 +101,13 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     // END Code from Paul Lawitzki
     var floorNum = -1
     var numPoints: Int = 0
+    lateinit var navView: NavigateBinding
+    private var currState: NavigationState = NavigationState.BROWSING
+    var room: String = ""
+
+    enum class NavigationState {
+        BROWSING, NAVIGATING, REPONSITIONING_B, REPONSITIONING_N, ARRIVE
+    }
 
     init {
 
@@ -113,6 +121,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         val intarr = extras?.getIntegerArrayList("connections")
         val nodes: DoubleArray?= extras?.getDoubleArray("nodes")
         val buildingName: String = extras?.getString("buildingName") as String
+        room = extras?.getString("roomName") as String
         floorNum = extras?.getInt("floorNum")
         val inStream: FileInputStream = this.openFileInput(fileName)
         var bmp: Bitmap = BitmapFactory.decodeStream(inStream)
@@ -141,10 +150,12 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         setContentView(view)
 
         buttonView = ActivityDisplayBinding.inflate(layoutInflater)
-        addContentView(buttonView.root,
+        //addContentView(buttonView.root,
+        //    ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+
+        navView = NavigateBinding.inflate(layoutInflater)
+        addContentView(navView.root,
             ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
-
-
 
         val reqResult = ActivityResultContracts.RequestPermission()
 
@@ -214,9 +225,23 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
         buttonView.UpButton.setOnClickListener {
             val launcher: MapLauncher =  MapLauncher()
-            launcher.launchGL(buildingName, this, floorNum+1)
+            launcher.launchGL(buildingName, this, floorNum+1, room)
 
         }
+
+        navView.exitButton.setOnClickListener {
+            onBackPressed()
+        }
+
+        navView.startButton.setOnClickListener{
+            transition(it)
+        }
+        navView.repositionButton.setOnClickListener{
+            transition(it)
+        }
+
+        navView.destination.text = buildingName + " " + room
+        hideFloorSelector()
         
         
         // Code taken from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
@@ -251,7 +276,101 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
     }
     */
-    
+    private fun showStart() {
+        navView.startButton.visibility = Button.VISIBLE
+    }
+    private fun hideStart() {
+        navView.startButton.visibility = Button.INVISIBLE
+    }
+    private fun showReposition() {
+        navView.repositionButton.text = "Reposition"
+        navView.repositionButton.setBackgroundColor(Color.parseColor("#FBC520"))
+    }
+    private fun showRepositionDone() {
+        navView.repositionButton.text = "Done"
+        navView.repositionButton.setBackgroundColor(Color.parseColor("#6EE14F"))
+    }
+    private fun showFloorSelector() {
+        navView.currentFloorHeader.visibility = TextView.VISIBLE
+        navView.floorPicker.visibility = NumberPicker.VISIBLE
+    }
+    private fun hideFloorSelector() {
+        navView.currentFloorHeader.visibility = TextView.INVISIBLE
+        navView.floorPicker.visibility = NumberPicker.INVISIBLE
+    }
+    private fun transition(clickedButton: View) {
+        with (clickedButton as Button) {
+            Log.d("Transition", "CurrState: $currState, Action: $text, $id")
+        }
+        when (clickedButton.id) {
+            navView.startButton.id -> {
+                when (currState) {
+                    NavigationState.BROWSING -> { currState = NavigationState.NAVIGATING; hideStart() }
+                }
+            }
+            navView.repositionButton.id -> {
+                with (clickedButton as Button) {
+                    if (text == "Reposition") {
+                        when (currState) {
+                            NavigationState.BROWSING -> { currState =
+                                NavigationState.REPONSITIONING_B
+                            }
+                            NavigationState.NAVIGATING -> { currState =
+                                NavigationState.REPONSITIONING_N
+                            }
+                        }
+                        createRepositionPopupWindow()
+                        hideStart()
+                        showRepositionDone()
+                        showFloorSelector()
+                        // same to turning on repos mode
+                        view.setLineMode(false)
+                        view.setPointMode(false)
+                        view.setMoveMode(false)
+                        view.setDragMode(true)
+                    }
+                    else {
+                        when (currState) {
+                            NavigationState.REPONSITIONING_B -> { currState =
+                                NavigationState.BROWSING; showStart() }
+                            NavigationState.REPONSITIONING_N -> { currState =
+                                NavigationState.NAVIGATING
+                            }
+                        }
+                        showReposition()
+                        hideFloorSelector()
+                        // same as turning on move mdode
+                        view.setLineMode(false)
+                        view.setPointMode(false)
+                        view.setMoveMode(true)
+                        view.setDragMode(false)
+                    }
+                }
+            }
+        }
+    }
+    private fun createRepositionPopupWindow() {
+        val inflater: LayoutInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val popupView = inflater.inflate(R.layout.resposition_tutorial, null)
+
+        val popupWindow = PopupWindow(
+            popupView,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+
+        popupWindow.showAtLocation(
+            navView.repositionButton, // Location to display popup window
+            Gravity.CENTER, // Exact position of layout to display popup
+            0, // X offset
+            0 // Y offset
+        )
+
+        val reposTutorialOKbutton = popupView.findViewById<Button>(R.id.reposTutorialOKbutton)
+        reposTutorialOKbutton.setOnClickListener{
+            popupWindow.dismiss()
+        }
+    }
     // Code taken from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
     fun initListeners() {
         mSensorManager!!.registerListener(
@@ -680,7 +799,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             "id" to -1,
             "type" to "Room",
             "floor" to floorNum,
-            "coordinates" to JSONArray(listOf(customPoints[index*4+1],  customPoints[index*4])),
+            "coordinates" to JSONArray(listOf(customPoints[index*4],  customPoints[index*4+1])),
             "neighbors" to JSONArray(neighbors)
         )
         val postReq = JsonObjectRequest(Request.Method.POST, serverUrl + "postnodes/",

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#90D3DC"
+    android:backgroundTint="#90D3DC">
+
+    <TextView
+        android:id="@+id/reposTutorialText"
+        android:layout_width="350dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="152dp"
+        android:text="To reposition yourself, please touch and drag the red dot.\n\nYou can also change floors using the buttons."
+        android:textFontWeight="0"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/reposTutorialOKbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="250dp"
+        android:backgroundTint="#6EE14F"
+        android:text="OK"
+        app:cornerRadius="50px"
+        app:layout_constraintEnd_toEndOf="@+id/reposTutorialText"
+        app:layout_constraintStart_toStartOf="@+id/reposTutorialText"
+        app:layout_constraintTop_toBottomOf="@+id/reposTutorialText" />
+
+    <ImageView
+        android:id="@+id/reposTutorialHandImage"
+        android:layout_width="199dp"
+        android:layout_height="204dp"
+        android:layout_marginTop="112dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/reposTutorialText"
+        app:srcCompat="@drawable/hand_repos" />
+</androidx.constraintlayout.widget.ConstraintLayout>

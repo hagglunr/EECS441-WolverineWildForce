@@ -35,15 +35,17 @@ class MapLauncher : AppCompatActivity() {
         val getRequest = JsonObjectRequest(serverUrl + "getnodes/?building=" + building,
             { response ->
                 nodes.clear()
-                Toast.makeText(context, "Handling request",
-                    Toast.LENGTH_SHORT).show();
+                connections.clear()
                 handledReq = true
                 val nodesReceived = try {
                     response.getJSONArray(buildingName)
                 } catch (e: JSONException) {
-
+                    Toast.makeText(context, "Bad JSON Arra  " ,
+                        Toast.LENGTH_SHORT).show();
                     JSONArray()
                 }
+                Toast.makeText(context, "Found " + nodesReceived.length().toString() + " nodes" ,
+                    Toast.LENGTH_SHORT).show();
                 for (i in 0 until nodesReceived.length()) {
                     val chattEntry = nodesReceived[i] as JSONArray
                     mostRecent = nodesReceived[i] as JSONArray
@@ -118,7 +120,7 @@ class MapLauncher : AppCompatActivity() {
     }
 
 
-    fun launchGL(s: String, ctx: Context, floorNum: Int) {
+    fun launchGL(s: String, ctx: Context, floorNum: Int, roomn: String) {
 
         buildingName = s
         //buildingName = s + 1.toString()
@@ -153,6 +155,7 @@ class MapLauncher : AppCompatActivity() {
             extras.putDoubleArray("nodes", buildingNodes.toDoubleArray() )
             extras.putString("buildingName", buildingName)
             extras.putInt("floorNum", floorNum)
+            extras.putString("roomName", roomn)
             intent.putExtras(extras)
             val stream = ctx.openFileOutput("bbb.png", Context.MODE_PRIVATE)
             img.compress(Bitmap.CompressFormat.PNG, 100, stream)

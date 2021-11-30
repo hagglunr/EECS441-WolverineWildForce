@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:outlineSpotShadowColor="@color/black"
+    android:textAlignment="gravity">
+
+    <TextView
+        android:id="@+id/navigationHeader"
+        android:layout_width="377dp"
+        android:layout_height="106dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="23dp"
+        android:layout_marginEnd="13dp"
+        android:background="#90D3DC"
+        android:backgroundTint="#A0E4F4"
+        android:outlineSpotShadowColor="#000000"
+        android:shadowColor="#000000"
+        android:shadowRadius="0"
+        android:text="Navigating to:"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/currentFloorHeader"
+        android:layout_width="379dp"
+        android:layout_height="56dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="19dp"
+        android:layout_marginTop="134dp"
+        android:layout_marginEnd="13dp"
+        android:background="#90D3DC"
+        android:backgroundTint="#A0E4F4"
+        android:outlineSpotShadowColor="#000000"
+        android:shadowColor="#000000"
+        android:shadowRadius="0"
+        android:text="User's Current Floor:"
+        android:textAlignment="viewStart"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.travijuu.numberpicker.library.NumberPicker
+        android:id="@+id/floorPicker"
+        android:layout_width="153dp"
+        android:layout_height="37dp"
+        android:layout_alignStart="@+id/currentFloorHeader"
+        android:layout_alignTop="@+id/currentFloorHeader"
+        android:layout_alignEnd="@+id/currentFloorHeader"
+        android:layout_alignBottom="@+id/currentFloorHeader"
+        android:layout_marginStart="214dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="11dp" />
+
+    <Button
+        android:id="@+id/repositionButton"
+        android:layout_width="124dp"
+        android:layout_height="59dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="20dp"
+        android:layout_toStartOf="@+id/startButton"
+        android:layout_toEndOf="@+id/exitButton"
+        android:backgroundTint="#FBC520"
+        android:text="Reposition"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/startButton"
+        app:layout_constraintStart_toEndOf="@+id/exitButton" />
+
+    <Button
+        android:id="@+id/exitButton"
+        android:layout_width="107dp"
+        android:layout_height="59dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="@android:color/holo_red_light"
+        android:text="Exit"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/startButton"
+        android:layout_width="wrap_content"
+        android:layout_height="58dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="#6EE14F"
+        android:text="Start"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/destination"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/navigationHeader"
+        android:layout_alignTop="@+id/navigationHeader"
+        android:layout_alignEnd="@+id/navigationHeader"
+        android:layout_alignBottom="@+id/navigationHeader"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="22dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="22dp"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:text="TextView"
+        android:textColor="#162EB1"
+        android:textSize="25sp" />
+
+</RelativeLayout>

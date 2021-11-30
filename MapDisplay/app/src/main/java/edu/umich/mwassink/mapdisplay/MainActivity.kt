@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
                 val launcher = MapLauncher()
                 val room = view.roomsSearchableSpinner.getSelectedItem().toString()
                 Toast.makeText(applicationContext, "Searching $building $room ...", Toast.LENGTH_SHORT).show()
-                launcher.launchGL(building, this, 1)
+                launcher.launchGL(building, this, 1, roomn = room)
             }
         }
 
