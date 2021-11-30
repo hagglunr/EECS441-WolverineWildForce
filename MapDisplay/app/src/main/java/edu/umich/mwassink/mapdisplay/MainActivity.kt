@@ -91,15 +91,18 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         view.nodeTester.setOnClickListener {
             launch {
-                var allnodes = NodesStore.getNodes(applicationContext, "BBB")
+                var allnodes = NodesStore.getNodes(applicationContext, "GOOB")
                 print("nodes size: " + allnodes.size + "\n")
 
                 val pathGen = PathGenerator()
-                val fastestPath = pathGen.getFastestPath("BBB", allnodes[0] as Node, allnodes[allnodes.size-1] as Node)
+                val fastestPath = pathGen.getFastestPath("GOOB", allnodes, allnodes[0] as Node, allnodes[allnodes.size-1] as Node)
+                print("Length of fastest path: " + fastestPath.size + "\n")
                 print("Order of Nodes:\n")
                 for (i in 0 until fastestPath.size) {
-                    print(fastestPath[i].id as String + ", ")
+                    var next = fastestPath[i].id as Int
+                    print("$next ")
                 }
+                print("\n")
             }
 
 //            // Below is for testing the implementation of A* algorithm

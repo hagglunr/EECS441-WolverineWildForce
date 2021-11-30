@@ -7,19 +7,22 @@ import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.*
+import kotlin.collections.ArrayList
 
 class PathGenerator {
     // Use the A* algorithm
     // https://www.researchgate.net/figure/A-search-algorithm-Pseudocode-of-the-A-search-algorithm-operating-with-open-and-closed_fig8_232085273
 
     // Returns list of Nodes in order of their intended traversal
-    fun getFastestPath(building: String, entranceNode: Node, destinationNode: Node) : ArrayList<Node> {
+    fun getFastestPath(building: String, nodesList: ArrayList<Node>, entranceNode: Node, destinationNode: Node) : ArrayList<Node> {
         // Init nodesList from database pull based on "building"
-        var nodesList = getNodes(building)
 
         var openList = ArrayList<Node>()
         var closedList = ArrayList<Node>()
-        var parentList = ArrayList<Int>(nodesList.size)
+        var parentList = ArrayList<Int>()
+        for (i in 0 until nodesList.size) {
+            parentList.add(0)
+        }
 
         openList.add(entranceNode)
 
@@ -31,8 +34,10 @@ class PathGenerator {
         }
 
         // g(Node) = cost so far to reach Node
-        var gList = ArrayList<Double>(nodesList.size)
-        gList.fill(Double.MAX_VALUE) // Every node costs unknown (MAX) to get to
+        var gList = ArrayList<Double>()
+        for (i in 0 until nodesList.size) {
+            gList.add(Double.MAX_VALUE)
+        } // Every node costs unknown (MAX) to get to
         gList[0] = 0.0 // Start node costs zero to get to
 
         // Perform A* algorithm
@@ -109,7 +114,7 @@ class PathGenerator {
 
         return path
     }
-
+/*
     // Return all nodes SORTED BY ID ASCENDING of a given building as an ArrayList<Node>
     fun getNodes(building: String) : ArrayList<Node> {
         var nodes = ArrayList<Node>()
@@ -172,4 +177,6 @@ class PathGenerator {
         */
         return nodes
     }
+
+ */
 }
