@@ -77,9 +77,5 @@ class Geometry {
              arr[start + 3] = w
 
          }
-
      }
-
-
-
 }
