@@ -145,32 +145,6 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
 
 
-
-        val reqResult = ActivityResultContracts.RequestPermission()
-
-        val reqLauncher = registerForActivityResult(reqResult) {
-                granted ->
-            if (!granted) {
-                System.exit(1)
-            }
-        }
-        
-        reqLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
-
-        // get sensorManager and initialise sensor listeners
-        mSensorManager = this.getSystemService(SENSOR_SERVICE) as SensorManager
-        initListeners()
-
-
-        // wait for one second until gyroscope and magnetometer/accelerometer
-        // data is initialised then schedule the complementary filter task
-        fuseTimer.scheduleAtFixedRate(
-            CalculateFusedOrientationTask(),
-            1000, TIME_CONSTANT
-        )
-        // END Code from Paul Lawitzki
-        
-        
         buttonView.LinesMode.setOnClickListener {
             view.setLineMode(true)
             view.setPointMode(false)
@@ -235,23 +209,31 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         gyroMatrix[7] = 0.0f
         gyroMatrix[8] = 1.0f
 
-    }
+        val reqResult = ActivityResultContracts.RequestPermission()
 
-/*
-    override fun onResume() {
-        super.onResume()
-
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        if (sensor != null) {
-            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
-            sensorOn = true
-        } else {
-            //System.exit(1)
+        val reqLauncher = registerForActivityResult(reqResult) {
+                granted ->
+            if (!granted) {
+                System.exit(1)
+            }
         }
 
+        reqLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+
+        // get sensorManager and initialise sensor listeners
+        mSensorManager = this.getSystemService(SENSOR_SERVICE) as SensorManager
+        initListeners()
+
+
+        // wait for one second until gyroscope and magnetometer/accelerometer
+        // data is initialised then schedule the complementary filter task
+        fuseTimer.scheduleAtFixedRate(
+            CalculateFusedOrientationTask(),
+            1000, TIME_CONSTANT
+        )
+        // END Code from Paul Lawitzki
     }
-    */
-    
+
     // Code taken from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
     fun initListeners() {
         mSensorManager!!.registerListener(
@@ -390,9 +372,9 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         // Wait 10 seconds at the beginning for the phone to realize its position in the world
         // Ideally this will be while the user is outside a building and away from artificial electromagnetic fields
         val timeSinceBegan: Float = (event.timestamp.toFloat() - initialTime) * 0.000000001F
-        // TODO: should probably make this a shorter time as the user moving the phone could skew data
-        // Might have to add something to the display to have the user hold the phone still to calibrate
-        if (timeSinceBegan < 10) return
+        // This time could be increased to get a better idea for how the phone is oriented in the world
+        // For this to happen though, we would have to add a calibration function at the beginning to ensure that the user was not moving the phone in order to get a good average of where the phone is
+        if (timeSinceBegan < 1) return
         gyroBegun = true
 
         // Average the accMagOrientation over the first 10 seconds to be used in the gyro initialization
@@ -522,7 +504,6 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         return resultMatrix
     }
 
-    // TODO: there might be a matrix mult function already made my Mark that I could use instead
     private fun matrixMultiplication(A: FloatArray, B: FloatArray): FloatArray {
         val result = FloatArray(9)
         result[0] = A[0] * B[0] + A[1] * B[3] + A[2] * B[6]
@@ -538,9 +519,6 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     }
 
     inner class CalculateFusedOrientationTask : TimerTask() {
-        // TODO: experiment with this filter_co value
-        // How heavy of a filter to apply, closer to 1 means more gyro and less accMag
-//        val FILTER_COEFFICIENT = 0.98f
         override fun run() {
             val oneMinusCoeff: Float = 1.0f - FILTER_COEFFICIENT
             fusedOrientation[0] = (FILTER_COEFFICIENT * gyroOrientation[0]
@@ -549,7 +527,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
                     + oneMinusCoeff * accMagOrientation[1])
             fusedOrientation[2] = (FILTER_COEFFICIENT * gyroOrientation[2]
                     + oneMinusCoeff * accMagOrientation[2])
-//            Log.d("Fusion", "0: " + fusedOrientation[0] + "\n1: " + fusedOrientation[1] + "\n2: " + fusedOrientation[2])
+
             // overwrite gyro matrix and orientation with fused orientation
             // to compensate gyro drift
             gyroMatrix = getRotationMatrixFromOrientation(fusedOrientation)
