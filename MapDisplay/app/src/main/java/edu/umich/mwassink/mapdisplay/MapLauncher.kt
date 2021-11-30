@@ -173,7 +173,5 @@ class MapLauncher : AppCompatActivity() {
             ctx.startActivity(intent)
         })
         th.start()
-
     }
-
 }
