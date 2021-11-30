@@ -15,7 +15,9 @@ class PathGenerator {
 
     // Returns list of Nodes in order of their intended traversal
     fun getFastestPath(building: String, nodesList: ArrayList<Node>, entranceNode: Node, destinationNode: Node) : ArrayList<Node> {
-        // Init nodesList from database pull based on "building"
+        // Sort nodesList by id (ascending)
+        nodesList.sortBy { it.id }
+        nodesList.forEach { print(" " + it.id) }
 
         var openList = ArrayList<Node>()
         var closedList = ArrayList<Node>()
@@ -40,6 +42,8 @@ class PathGenerator {
         } // Every node costs unknown (MAX) to get to
         gList[0] = 0.0 // Start node costs zero to get to
 
+        print("Starting A*\n")
+
         // Perform A* algorithm
         while (!openList.isEmpty()) {
 
@@ -54,12 +58,15 @@ class PathGenerator {
                 }
             }
 
+            print("Found new checkNode: " + checkNode.id + "\n")
+
             // Move checkNode from open to closed list
             openList.remove(checkNode)
             closedList.add(checkNode)
 
             // If node is destination node, we are finished
             if (checkNode.isSameAs(destinationNode)) {
+                print("Reached destinationNode\n")
                 break
             }
 
@@ -81,6 +88,7 @@ class PathGenerator {
                 if (isInOpenList && cost < gList[neighborID]) {
                     openList.remove(neighborNode)
                     parentList[neighborID] = checkNode.id as Int
+                    print("Neighbor " + neighborID + " removed from openList\n")
                 }
 
                 // If neighbor in closed list and cost < g(neighbor), remove from closed list
@@ -92,25 +100,46 @@ class PathGenerator {
                 }
                 if (isInClosedList && cost < gList[neighborID]) {
                     closedList.remove(neighborNode)
+                    print("Neighbor " + neighborID + " removed from closedList\n")
                 }
 
                 // If neighbor not in open or closed, then add to open and update g(neighbor)
                 if (!isInClosedList && !isInOpenList) {
                     openList.add(neighborNode)
                     gList[neighborID] = cost
+                    parentList[neighborID] = checkNode.id as Int
+                    print("Neighbor " + neighborID + " added to openList\n")
                 }
             }
         }
+
+        print("Finished A*\n")
+
+        print("Starting backtracking\n")
 
         // Traverse from destination to start by parent list
         var path = ArrayList<Node>()
         var currentNode = destinationNode
         while (!currentNode.isSameAs(entranceNode)) {
             path.add(currentNode)
+            print("Added node " + currentNode.id + " to backtracking path\n")
             currentNode = nodesList[parentList[currentNode.id as Int]]
         }
         path.add(entranceNode)
         path.reverse()
+
+        print("Length of fastest path: " + path.size + "\n")
+        print("Order of Nodes:\n")
+        for (i in 0 until path.size) {
+            var next = path[i].id as Int
+            print("$next ")
+        }
+        print("\n")
+        for (i in 0 until path.size) {
+            var next = path[i].name as String
+            print("$next -> ")
+        }
+        print("\n")
 
         return path
     }
