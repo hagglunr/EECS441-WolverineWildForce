@@ -666,9 +666,9 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     var linAccelCount = 0
 
     // values found by laying the phone flat and finding the average linear acceleration, this is the offset that will be subtracted below
-    val xAccelerationOffset: Double = 0.0
-    val yAccelerationOffset: Double = 0.0
-    val zAccelerationOffset: Double = 0.0
+    val xAccelerationOffset = -0.03
+    val yAccelerationOffset = -0.0224
+    val zAccelerationOffset = -0.00062
     
     private fun calculateWorldMovement(event: SensorEvent) {
         // phone linear accelerations, need to be corrected for orientation
@@ -687,7 +687,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         val xAccelerationAverage: Double = xAccelerationSum / linAccelCount
         val yAccelerationAverage: Double = yAccelerationSum / linAccelCount
         val zAccelerationAverage: Double = zAccelerationSum / linAccelCount
-        Log.d("offsets: ", "x: " + xAccelerationAverage + "\ny: " + yAccelerationAverage + "\nz: " + zAccelerationAverage)
+//        Log.d("offsets: ", "x: " + xAccelerationAverage + "\ny: " + yAccelerationAverage + "\nz: " + zAccelerationAverage)
 
         // current phone orientation angles, used to correct the above accelerations
         val cosX = cos(fusedOrientation[1])
@@ -704,9 +704,9 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         val zWorldAcceleration = zAcceleration * (cosX + cosY) - xAcceleration * sinY - yAcceleration * sinX
 
         // add new accelerations to the running sum to be averaged later and increase the count of total measurements
-        worldAccelerationSumArray[0] += xWorldAcceleration
-        worldAccelerationSumArray[1] += yWorldAcceleration
-        worldAccelerationSumArray[2] += zWorldAcceleration
+        worldAccelerationSumArray[0] += xWorldAcceleration.toFloat()
+        worldAccelerationSumArray[1] += yWorldAcceleration.toFloat()
+        worldAccelerationSumArray[2] += zWorldAcceleration.toFloat()
     }
 
 
