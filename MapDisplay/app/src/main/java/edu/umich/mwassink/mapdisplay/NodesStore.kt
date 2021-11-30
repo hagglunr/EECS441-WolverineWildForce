@@ -5,17 +5,23 @@ import android.util.Log
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.ArrayList
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 object NodesStore {
-    private lateinit var queue: RequestQueue
-    val nodes = arrayListOf<Node>()
+    // private lateinit var queue: RequestQueue
+    // var nodes = arrayListOf<Node>()
 
-    fun getNodes(context: Context, building: String, completion: () -> Unit) {
-        nodes.clear()
+    suspend fun getNodes(context: Context, building: String) = suspendCoroutine<ArrayList<Node>> { cont ->
+//        nodes.clear()
+        val queue = Volley.newRequestQueue(context)
+        var nodes = arrayListOf<Node>()
         val url = "https://52.14.13.109/getnodes/?building=" + building as String
         var getRequest = JsonObjectRequest(url,
             { response ->
@@ -24,6 +30,7 @@ object NodesStore {
                 } catch (e: JSONException) {
                     JSONArray()
                 }
+                Log.d("getNodes", "Before for loop")
                 for (i in 0 until infoReceived.length()) {
                     val nodeinfo = infoReceived[i] as JSONArray
                     val name = nodeinfo[1].toString()
@@ -73,24 +80,15 @@ object NodesStore {
                         )
                     )
                 }
-                completion()
+                cont.resume(nodes)
             }, {
                 print("failed\n")
-                completion()
             }
         )
-//
-//                Log.d("getNodes", "Size of nodes: ${infoReceived.length()}")
-//
-//                completion()
-//            }, {
-//                    error -> Log.e("getNodes", error.localizedMessage ?: "JsonObjectRequest error")
-//            }
-//        )
 
-        if (!this::queue.isInitialized) {
-            queue = Volley.newRequestQueue(context)
-        }
+//        if (!this::queue.isInitialized) {
+//            queue = Volley.newRequestQueue(context)
+//        }
         queue.add(getRequest)
     }
 }

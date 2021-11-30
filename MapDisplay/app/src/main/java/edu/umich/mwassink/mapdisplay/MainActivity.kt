@@ -13,13 +13,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import edu.umich.mwassink.mapdisplay.databinding.ActivityMainBinding
+import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.Unconfined
+import kotlin.coroutines.CoroutineContext
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CoroutineScope {
+    protected lateinit var job: Job
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.Main
 
     private lateinit var view: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        job = Job()
 
         view = ActivityMainBinding.inflate(layoutInflater)
 //        view.root.setBackgroundColor(
@@ -81,24 +88,34 @@ class MainActivity : AppCompatActivity() {
         view.searchButton.setOnClickListener {
             startActivity(Intent(this, DebugActivity::class.java))
         }
-/*
+
         view.nodeTester.setOnClickListener {
+            launch {
+                var allnodes = NodesStore.getNodes(applicationContext, "BBB")
+                print("nodes size: " + allnodes.size + "\n")
 
-            // Below is for testing the implementation of A* algorithm
-            NodesStore.getNodes(applicationContext, "BBB") {
-                Log.d("getNodes", "getNodes completed!")
+                val pathGen = PathGenerator()
+                val fastestPath = pathGen.getFastestPath("BBB", allnodes[0] as Node, allnodes[allnodes.size-1] as Node)
+                print("Order of Nodes:\n")
+                for (i in 0 until fastestPath.size) {
+                    print(fastestPath[i].id as String + ", ")
+                }
             }
 
-            print("nodes size: " + NodesStore.nodes.size + "\n")
-            val allNodes = NodesStore.nodes
-
-            val pathGen = PathGenerator()
-            val fastestPath = pathGen.getFastestPath("BBB", allNodes[0] as Node, allNodes[allNodes.size-1] as Node)
-            print("Order of Nodes:\n")
-            for (i in 0 until fastestPath.size) {
-                print(fastestPath[i].id as String + ", ")
-            }
+//            // Below is for testing the implementation of A* algorithm
+//            NodesStore.getNodes(applicationContext, "BBB") {
+//                Log.d("getNodes", "getNodes completed!")
+//            }
+//
+//            print("nodes size: " + NodesStore.nodes.size + "\n")
+//            val allNodes = NodesStore.nodes
+//
+//
         }
-*/
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
     }
 }
