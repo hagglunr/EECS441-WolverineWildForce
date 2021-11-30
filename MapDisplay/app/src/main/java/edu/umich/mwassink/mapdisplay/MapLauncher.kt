@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.util.concurrent.Semaphore
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -44,9 +45,9 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
     fun getNodes(building: String, floorNum: Int,  context: Context, completion: () -> Unit) {
         val getRequest = JsonObjectRequest(serverUrl + "getnodes/?building=" + building,
             { response ->
-                nodes.clear()
+                //nodes.clear()
                 System.out.println("***Nodes cleared***")
-                connections.clear()
+                //connections.clear()
                 handledReq = true
                 val nodesReceived = try {
                     response.getJSONArray(buildingName)
@@ -127,15 +128,16 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
     }
 
 
-    fun setComplete() {
-        synchronized(this) {
-            reqComplete += 1
-        }
+    fun setComplete(sem: Semaphore) {
+        sem.release()
     }
 
 
     fun launchGL(s: String, ctx: Context, floorNum: Int, roomn: String) {
 
+        val sem = Semaphore(0)
+        nodes.clear()
+        connections.clear()
         job = Job()
         launch {
             var pathGenerator = PathGenerator()
@@ -151,6 +153,7 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
                 connections.add(fastestPath[i].id as Int)
                 connections.add(fastestPath[i-1].id as Int)
             }
+            sem.release()
         }
 
         buildingName = s
@@ -161,21 +164,20 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
 
             getNodes(buildingName, floorNum, context = ctx, {
                 runOnUiThread {
-                    setComplete()
+                    setComplete(sem)
                 }
             })
             getMediaURL(buildingName, floorNum,  context =  ctx, {
                 runOnUiThread {
-                    setComplete()
+                    setComplete(sem)
                 }
             })
-            var complete = 0
-            while (complete != 2) {
-                synchronized(this) {
-                    complete = reqComplete
-                }
-            }
 
+
+
+            sem.acquire() // downs the semaphore
+            sem.acquire()
+            sem.acquire()
 
             var buildingNodes = ArrayList(nodes)
 

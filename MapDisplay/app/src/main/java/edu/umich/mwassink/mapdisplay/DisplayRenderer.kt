@@ -541,7 +541,10 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
             val ty = invLerp(0f, realHeight, y)
             customPoints.set(index*4, lerp(l, r, tx) )
             customPoints.set(index*4 + 1, lerp(t, b, ty) )
-
+            if (index == 0) {
+                userPos[0] = lerp(l, r, tx)
+                userPos[1] = lerp(t, b, ty)
+            }
         }
     }
 

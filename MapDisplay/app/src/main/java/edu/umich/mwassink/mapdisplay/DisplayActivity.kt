@@ -132,7 +132,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         numPoints = nodes?.size as Int
         numPoints /= 2
         var flNodes: FloatArray
-        if (buildingName != "BBB") {
+        if (buildingName != "BBB" && buildingName != "GOOB") {
             flNodes = scaleDoubles(nodes as DoubleArray )
         }
         else {
