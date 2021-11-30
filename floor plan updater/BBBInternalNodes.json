@@ -1,4 +1,4 @@
-{"BBB":[
+{"GOOB":[
 {"id":0,"coordinates":[-83.71627064943539,42.29271096245871],"type":"Entrance","neighbors":[1,5,7,9],"floor":"1","name":"South Entrance"},
 {"id":1,"coordinates":[-83.71638416262677,42.29272519964592],"type":"Room","neighbors":[0],"floor":"1","name":"CAEN Lab West Door 1"},
 {"id":2,"coordinates":[-83.71649297724593,42.29287138509722],"type":"Room","neighbors":[3,4],"floor":"1","name":"CAEN Lab West Door 2"},
