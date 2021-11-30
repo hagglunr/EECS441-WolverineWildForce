@@ -18,12 +18,13 @@ import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.ArrayList
 import kotlin.math.floor
 
 
 class MapLauncher : AppCompatActivity() {
-    var nodes =  arrayListOf<Double>()
-    var connections = arrayListOf<Int>()
+    @Volatile var nodes =  arrayListOf<Double>()
+    @Volatile var connections = arrayListOf<Int>()
     val serverUrl: String = "https://52.14.13.109/"
     lateinit var queue: RequestQueue
     lateinit var mostRecent: JSONArray
@@ -35,18 +36,19 @@ class MapLauncher : AppCompatActivity() {
         val getRequest = JsonObjectRequest(serverUrl + "getnodes/?building=" + building,
             { response ->
                 nodes.clear()
+                System.out.println("***Nodes cleared***")
                 connections.clear()
                 handledReq = true
                 val nodesReceived = try {
                     response.getJSONArray(buildingName)
                 } catch (e: JSONException) {
-                    Toast.makeText(context, "Bad JSON Arra  " ,
+                    Toast.makeText(context, "Bad JSON Array" ,
                         Toast.LENGTH_SHORT).show();
                     JSONArray()
                 }
-                Toast.makeText(context, "Found " + nodesReceived.length().toString() + " nodes" ,
-                    Toast.LENGTH_SHORT).show();
+                var nCount = 0
                 for (i in 0 until nodesReceived.length()) {
+
                     val chattEntry = nodesReceived[i] as JSONArray
                     mostRecent = nodesReceived[i] as JSONArray
                     val neighbors = if (chattEntry[7] == JSONObject.NULL) null else chattEntry[7] as JSONArray
@@ -55,6 +57,7 @@ class MapLauncher : AppCompatActivity() {
                         if (chattEntry[4].toString().toInt() == floorNum) {
                             nodes.add(((chattEntry[5]).toString()).toDouble()) // long
                             nodes.add(((chattEntry[6]).toString()).toDouble()) // latitude
+                            nCount++
                             if (neighbors != null) {
                                 for (j in 0 until neighbors.length()) {
                                     val flanders = neighbors[j].toString().toInt()
@@ -69,6 +72,8 @@ class MapLauncher : AppCompatActivity() {
                             Toast.LENGTH_SHORT).show();
                     }
                 }
+                Toast.makeText(context, "Got " + nCount + " nodes" ,
+                    Toast.LENGTH_SHORT).show();
                 completion()
             }, { completion() }
         )
@@ -82,7 +87,7 @@ class MapLauncher : AppCompatActivity() {
     fun getMediaURL(building: String, floorNum: Int, context: Context, completion: () -> Unit) {
         val getRequest = JsonObjectRequest(serverUrl + "getfloorplans/?building=" + building,
             { response ->
-                nodes.clear()
+
                 Toast.makeText(context, "Fetching floor plan",
                     Toast.LENGTH_SHORT).show();
                 val nodesReceived = try {
@@ -123,6 +128,7 @@ class MapLauncher : AppCompatActivity() {
     fun launchGL(s: String, ctx: Context, floorNum: Int, roomn: String) {
 
         buildingName = s
+        reqComplete = 0
         //buildingName = s + 1.toString()
         val th: Thread = Thread(Runnable() {
             var intent: Intent =Intent(ctx, DisplayActivity::class.java)
@@ -144,8 +150,10 @@ class MapLauncher : AppCompatActivity() {
                 }
             }
 
-            var buildingNodes = nodes
-            var conns = connections
+
+            var buildingNodes = ArrayList(nodes)
+
+            var conns = ArrayList(connections)
 
             var iStream = (URL(floorURL).content) as InputStream
             var img = BitmapFactory.decodeStream(iStream)

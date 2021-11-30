@@ -277,19 +277,28 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
 
         // user
 
+        if (customPoints.size > 0) {
+
+
             redLoc = GLES20.glGetUniformLocation(initialProgram, "red")
             GLES20.glUniform1f(redLoc, 10f)
             GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, buffCPUMemory)
             GLES20.glEnableVertexAttribArray(0)
-           //
+            //
             GLES20.glDrawArrays(GLES20.GL_POINTS, 1, customPoints.size / 4)
-        GLES20.glUniform1f(redLoc, 1f)
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1)
-        GLES20.glUniform1f(redLoc, 10f)
+            GLES20.glUniform1f(redLoc, 1f)
+            GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1)
+            GLES20.glUniform1f(redLoc, 10f)
 
-            GLES20.glDrawElements(GLES20.GL_LINES, (customLines.size/2) * 2, GLES20.GL_UNSIGNED_INT, indexBuffer )
+            GLES20.glDrawElements(
+                GLES20.GL_LINES,
+                (customLines.size / 2) * 2,
+                GLES20.GL_UNSIGNED_INT,
+                indexBuffer
+            )
 
-        err = GLES20.glGetError()
+            err = GLES20.glGetError()
+        }
 
     }
 
