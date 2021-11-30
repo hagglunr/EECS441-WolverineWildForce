@@ -284,7 +284,10 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
             GLES20.glUniform1f(redLoc, 10f)
             GLES20.glVertexAttribPointer(0, 4, GLES20.GL_FLOAT, false, 0, buffCPUMemory)
             GLES20.glEnableVertexAttribArray(0)
-            //
+
+            // Relate user position to the red square. Userpos updates with sensor data
+            customPoints[0] = userPos[0]
+            customPoints[1] = userPos[1]
             GLES20.glDrawArrays(GLES20.GL_POINTS, 1, customPoints.size / 4)
             GLES20.glUniform1f(redLoc, 1f)
             GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1)
