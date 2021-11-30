@@ -59,7 +59,7 @@ open class Node (
         }
         print("[")
         for (i in 0 until this.neighbors!!.size) {
-            print("$i ")
+            print(" " + neighbors[i])
         }
         print("]\n")
     }

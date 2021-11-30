@@ -147,8 +147,9 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
             var entranceNode = allNodes[0]//updateUserLocation.getClosestEntrance()
             var destinationNode = allNodes[allNodes.size - 1]
             fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode, destinationNode)
-            for (i in 0 until fastestPath.size) {
+            for (i in 1 until fastestPath.size) {
                 connections.add(fastestPath[i].id as Int)
+                connections.add(fastestPath[i-1].id as Int)
             }
         }
 
