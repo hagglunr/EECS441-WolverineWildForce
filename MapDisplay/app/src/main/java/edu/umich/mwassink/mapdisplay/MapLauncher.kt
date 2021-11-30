@@ -28,6 +28,7 @@ class MapLauncher : AppCompatActivity() {
     val serverUrl: String = "https://52.14.13.109/"
     lateinit var queue: RequestQueue
     lateinit var mostRecent: JSONArray
+    lateinit var fastestPath: ArrayList<Node>
     var handledReq: Boolean = false
     @Volatile var reqComplete: Int = 0
     var buildingName = ""
@@ -61,8 +62,8 @@ class MapLauncher : AppCompatActivity() {
                             if (neighbors != null) {
                                 for (j in 0 until neighbors.length()) {
                                     val flanders = neighbors[j].toString().toInt()
-                                    connections.add(i)
-                                    connections.add(flanders)
+                                    /*connections.add(i)
+                                    connections.add(flanders)*/
                                 }
                             }
                         }
@@ -71,6 +72,54 @@ class MapLauncher : AppCompatActivity() {
                         Toast.makeText(context, "Wrong length expected 8 got " + chattEntry.length().toString(),
                             Toast.LENGTH_SHORT).show();
                     }
+
+                    val nodeinfo = nodesReceived[i] as JSONArray
+                    val name = nodeinfo[1].toString()
+                    val id = nodeinfo[2].toString().toInt()
+                    val typeStr = nodeinfo[3].toString()
+                    var type: NodeType? = null
+                    var floorNum: Int? = null
+                    if (typeStr == "Entrance") {
+                        type = NodeType.ENTRANCE
+                    }
+                    else if (typeStr == "Staircase") {
+                        type = NodeType.STAIRCASE
+                    }
+                    else if (typeStr == "Path") {
+                        type = NodeType.PATH
+                    }
+                    else if (typeStr == "Restroom") {
+                        type = NodeType.RESTROOM
+                    }
+                    else if (typeStr == "Room") {
+                        type = NodeType.ROOM
+                    }
+                    floorNum = nodeinfo[4].toString().toInt()
+//                    val coords = JSONArray(nodeinfo[3])
+                    val longitude = nodeinfo[5].toString().toDouble()
+                    val latitude = nodeinfo[6].toString().toDouble()
+                    val neighborsarray = nodeinfo[7] as JSONArray
+                    var neoneighbors = ArrayList<Int>()
+                    for (j in 0 until neighborsarray.length()) {
+                        /* I just changed the .getJSONObject(j) to the regular bracket index since
+                        the value inside was already an int it seems. */
+
+//                        neighbors.add(neighborsarray.getJSONObject(j).toString().toInt())
+                        val testObject = neighborsarray[j]
+                        val testInt = testObject.toString().toInt()
+                        neoneighbors.add(testInt)
+                    }
+                    NodesStore.nodes.add(
+                        Node(
+                            name = name,
+                            id = id,
+                            floorNum = floorNum,
+                            type = type,
+                            latitude = latitude,
+                            longitude = longitude,
+                            neighbors = neoneighbors
+                        )
+                    )
                 }
                 Toast.makeText(context, "Got " + nCount + " nodes" ,
                     Toast.LENGTH_SHORT).show();
@@ -152,6 +201,15 @@ class MapLauncher : AppCompatActivity() {
 
 
             var buildingNodes = ArrayList(nodes)
+
+            var pathGenerator = PathGenerator()
+            var updateUserLocation = UpdateUserLocation()
+            var entranceNode = NodesStore.nodes[0]//updateUserLocation.getClosestEntrance()
+            var destinationNode = NodesStore.nodes[2]
+            fastestPath = pathGenerator.getFastestPath(buildingName, entranceNode, destinationNode)
+            for (i in 0 until fastestPath.size) {
+                connections.add(fastestPath[i].id as Int)
+            }
 
             var conns = ArrayList(connections)
 
