@@ -496,6 +496,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         val timeSinceBegan: Float = (event.timestamp.toFloat() - initialTime) * 0.000000001F
         // This time could be increased to get a better idea for how the phone is oriented in the world
         // For this to happen though, we would have to add a calibration function at the beginning to ensure that the user was not moving the phone in order to get a good average of where the phone is
+        // This calibration would be a good opportunity to calibrate the linear acceleration offset as mentioned at https://developer.android.com/guide/topics/sensors/sensors_motion#sensors-motion-linear
         if (timeSinceBegan < 1) return
         gyroBegun = true
 
@@ -658,11 +659,35 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     }
     // END Code from Paul Lawitzki
 
+    // used to find hardcoded linear acceleration offset
+    var xAccelerationSum = 0.0
+    var yAccelerationSum = 0.0
+    var zAccelerationSum = 0.0
+    var linAccelCount = 0
+
+    // values found by laying the phone flat and finding the average linear acceleration, this is the offset that will be subtracted below
+    val xAccelerationOffset: Double = 0.0
+    val yAccelerationOffset: Double = 0.0
+    val zAccelerationOffset: Double = 0.0
+    
     private fun calculateWorldMovement(event: SensorEvent) {
         // phone linear accelerations, need to be corrected for orientation
-        val xAcceleration = event.values[0]
-        val yAcceleration = event.values[1]
-        val zAcceleration = event.values[2]
+        val xAcceleration = event.values[0] - xAccelerationOffset
+        val yAcceleration = event.values[1] - yAccelerationOffset
+        val zAcceleration = event.values[2] - zAccelerationOffset
+
+        // update linear acceleration sums and count, used to find offsets
+        xAccelerationSum += xAcceleration
+        yAccelerationSum += yAcceleration
+        zAccelerationSum += zAcceleration
+        linAccelCount++
+
+        // Calculate average thus far and print to log
+        // As long as we hold the phone flat, we can use these values as the offset to be subtracted
+        val xAccelerationAverage: Double = xAccelerationSum / linAccelCount
+        val yAccelerationAverage: Double = yAccelerationSum / linAccelCount
+        val zAccelerationAverage: Double = zAccelerationSum / linAccelCount
+        Log.d("offsets: ", "x: " + xAccelerationAverage + "\ny: " + yAccelerationAverage + "\nz: " + zAccelerationAverage)
 
         // current phone orientation angles, used to correct the above accelerations
         val cosX = cos(fusedOrientation[1])
