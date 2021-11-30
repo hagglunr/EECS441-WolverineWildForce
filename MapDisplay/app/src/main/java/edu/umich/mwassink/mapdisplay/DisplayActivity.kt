@@ -36,7 +36,8 @@ import java.util.*
 import kotlin.math.cos
 import kotlin.math.sin
 import com.travijuu.numberpicker.library.NumberPicker
-  
+import kotlin.math.abs
+
 // Uses some Code from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
 // In order to fuse sensors and get more accurate readings from them
 
@@ -384,9 +385,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             this,
             mSensorManager!!.getDefaultSensor(Sensor.TYPE_STEP_COUNTER),
             SensorManager.SENSOR_DELAY_UI
-            // TODO measure how long this is, I may have to change my method for gathering direction if is short
-            // Might just need to gather accelerations until steps are taken, then reset
-        )
+        ) // Could possibly change delay to "fastest"
         sensor = mSensorManager!!.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
     }
 
@@ -443,12 +442,11 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             var worldDistanceXratio: Float = 0F
             var worldDistanceYratio: Float = 0F
 
-            // TODO: update this to align with how the step counter works
             if (newSteps > 0) {
                 // normalize the direction that the user moved in the time that it took them to make a step
                 val worldDistanceX = worldAccelerationSumArray[0]
                 val worldDistanceY = worldAccelerationSumArray[1]
-                val totalDistance = worldDistanceX + worldDistanceY
+                val totalDistance = abs(worldDistanceX) + abs(worldDistanceY)
                 worldDistanceXratio = worldDistanceX / totalDistance
                 worldDistanceYratio = worldDistanceY / totalDistance
 
