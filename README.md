@@ -7,6 +7,6 @@
 ![Elevator Pitch](/assets/title.png)
 ![Team](/assets/team.png)
 
-[demo_page]: https://youtu.be/sample
+[demo_page]: https://youtu.be/e6dJD5ZE5zA
 [wiki_page]: https://github.com/member/team/wiki
-[process_page]: https://trello.com/b/sample/general
+[process_page]: https://trello.com/b/IiAiFOBA
