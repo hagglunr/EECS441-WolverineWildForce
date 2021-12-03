@@ -146,8 +146,9 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
             for (node in allNodes) {
                 node.print()
             }
-            var entranceNode = allNodes[0]//updateUserLocation.getClosestEntrance()
-            var destinationNode = allNodes[allNodes.size - 1]
+            val user = User()
+            var entranceNode = updateUserLocation.getClosestEntrance(user, allNodes)
+            var destinationNode =
             fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode, destinationNode)
             for (i in 1 until fastestPath.size) {
                 connections.add(fastestPath[i].id as Int)

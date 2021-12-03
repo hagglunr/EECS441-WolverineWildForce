@@ -16,7 +16,6 @@ class UpdateUserLocation : AppCompatActivity() {
     private val serverURL = ""
     private val buildingName = ""
     private lateinit var queue: RequestQueue
-    private val entrances = arrayListOf<Node?>()
 
 //    fun getEntrances(user : User, building: String, context: Context, completion: () -> Unit) {
 //        val getRequest = JsonObjectRequest(serverURL+"?buildingName="+buildingName,
@@ -53,9 +52,15 @@ class UpdateUserLocation : AppCompatActivity() {
 //    }
 
     // TODO: Later consider having default entrance in case of null or bad server request
-    fun getClosestEntrance(user : User): Node? {
+    fun getClosestEntrance(user : User, nodes: ArrayList<Node>): Node? {
         var shortestDistance = Double.MAX_VALUE
         var shortestIndex = Int.MAX_VALUE
+        var entrances = ArrayList<Node>()
+        for (node in nodes) {
+            if (node.type == NodeType.ENTRANCE) {
+                entrances.add(node)
+            }
+        }
         for (i in 0 until entrances.size) {
             val entranceLat = entrances[i]!!.latitude
             val entranceLon = entrances[i]!!.longitude
