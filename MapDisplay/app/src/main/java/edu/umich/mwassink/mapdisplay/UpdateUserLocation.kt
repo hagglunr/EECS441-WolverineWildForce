@@ -18,39 +18,39 @@ class UpdateUserLocation : AppCompatActivity() {
     private lateinit var queue: RequestQueue
     private val entrances = arrayListOf<Node?>()
 
-    fun getEntrances(user : User, building: String, context: Context, completion: () -> Unit) {
-        val getRequest = JsonObjectRequest(serverURL+"?buildingName="+buildingName,
-            { response ->
-                val infoReceived = try { response.getJSONArray("maps") } catch (e: JSONException) { JSONArray() }
-                val nFields = 3
-
-                for (i in 0 until infoReceived.length()) {
-                    val entrance = infoReceived[i] as JSONArray
-                    if (entrance.length() == nFields) {
-                        val geoArr =
-                            if (entrance[3] == JSONObject.NULL) null else JSONArray(entrance[3] as String)
-                        entrances.add(
-                            Node(
-                                entranceNum = infoReceived[0].toString().toInt(),
-                                latitude = infoReceived[1].toString().toDouble(),
-                                longitude = infoReceived[2].toString().toDouble(),
-                                neighbors = arrayListOf<Node>()
-                            )
-                        )
-                    } else {
-                        Log.e("getEntrances", "Received unexpected number of fields: " + infoReceived.length().toString() + " instead of " + nFields.toString())
-                    }
-                }
-                completion()
-            }, { completion() }
-        )
-        if (!this::queue.isInitialized) {
-            queue = Volley.newRequestQueue(context)
-        }
-        queue.add(getRequest)
-        getClosestEntrance(user)
-
-    }
+//    fun getEntrances(user : User, building: String, context: Context, completion: () -> Unit) {
+//        val getRequest = JsonObjectRequest(serverURL+"?buildingName="+buildingName,
+//            { response ->
+//                val infoReceived = try { response.getJSONArray("maps") } catch (e: JSONException) { JSONArray() }
+//                val nFields = 3
+//
+//                for (i in 0 until infoReceived.length()) {
+//                    val entrance = infoReceived[i] as JSONArray
+//                    if (entrance.length() == nFields) {
+//                        val geoArr =
+//                            if (entrance[3] == JSONObject.NULL) null else JSONArray(entrance[3] as String)
+//                        entrances.add(
+//                            Node(
+//                                entranceNum = infoReceived[0].toString().toInt(),
+//                                latitude = infoReceived[1].toString().toDouble(),
+//                                longitude = infoReceived[2].toString().toDouble(),
+//                                neighbors = arrayListOf<Int>()
+//                            )
+//                        )
+//                    } else {
+//                        Log.e("getEntrances", "Received unexpected number of fields: " + infoReceived.length().toString() + " instead of " + nFields.toString())
+//                    }
+//                }
+//                completion()
+//            }, { completion() }
+//        )
+//        if (!this::queue.isInitialized) {
+//            queue = Volley.newRequestQueue(context)
+//        }
+//        queue.add(getRequest)
+//        getClosestEntrance(user)
+//
+//    }
 
     // TODO: Later consider having default entrance in case of null or bad server request
     fun getClosestEntrance(user : User): Node? {

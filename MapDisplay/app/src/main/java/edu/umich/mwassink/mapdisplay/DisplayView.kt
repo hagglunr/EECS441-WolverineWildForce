@@ -22,13 +22,6 @@ import kotlin.math.sqrt
 import android.widget.EditText
 import android.content.DialogInterface
 
-
-
-
-
-
-
-
 class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
     val renderer: DisplayRenderer
     var scale: Float
@@ -184,10 +177,6 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
         renderer.changePos(dx, dy)
     }
 
-
-
-
-
     // If I have a bunch of 2D points, then I can encode them in a different form with an s and a t value
     // based off of some min and max points and interpolation
     // e.g min (25, 25), max (50, 75)... 45, 50 -> .8, .5
@@ -195,8 +184,6 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
         System.exit(1)
         var f: FloatArray = FloatArray(interleavedPoints.size)
         return f
-
-
     }
 
     fun setMoveMode(what: Boolean) {
@@ -222,8 +209,4 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
     fun setDragMode(what: Boolean) {
         drag = what
     }
-
-
-
-
 }

@@ -15,19 +15,29 @@ import android.widget.Toast
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import java.util.concurrent.Semaphore
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.ArrayList
+import kotlin.coroutines.CoroutineContext
 import kotlin.math.floor
 
 
-class MapLauncher : AppCompatActivity() {
+class MapLauncher : AppCompatActivity(), CoroutineScope {
+    protected lateinit var job: Job
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.Main
     @Volatile var nodes =  arrayListOf<Double>()
     @Volatile var connections = arrayListOf<Int>()
     val serverUrl: String = "https://52.14.13.109/"
     lateinit var queue: RequestQueue
     lateinit var mostRecent: JSONArray
+    lateinit var fastestPath: ArrayList<Node>
     var handledReq: Boolean = false
     @Volatile var reqComplete: Int = 0
     var buildingName = ""
@@ -35,9 +45,9 @@ class MapLauncher : AppCompatActivity() {
     fun getNodes(building: String, floorNum: Int,  context: Context, completion: () -> Unit) {
         val getRequest = JsonObjectRequest(serverUrl + "getnodes/?building=" + building,
             { response ->
-                nodes.clear()
+                //nodes.clear()
                 System.out.println("***Nodes cleared***")
-                connections.clear()
+                //connections.clear()
                 handledReq = true
                 val nodesReceived = try {
                     response.getJSONArray(buildingName)
@@ -58,13 +68,13 @@ class MapLauncher : AppCompatActivity() {
                             nodes.add(((chattEntry[5]).toString()).toDouble()) // long
                             nodes.add(((chattEntry[6]).toString()).toDouble()) // latitude
                             nCount++
-                            if (neighbors != null) {
+                            /*if (neighbors != null) {
                                 for (j in 0 until neighbors.length()) {
                                     val flanders = neighbors[j].toString().toInt()
                                     connections.add(i)
                                     connections.add(flanders)
                                 }
-                            }
+                            }*/
                         }
 
                     } else {
@@ -118,14 +128,33 @@ class MapLauncher : AppCompatActivity() {
     }
 
 
-    fun setComplete() {
-        synchronized(this) {
-            reqComplete += 1
-        }
+    fun setComplete(sem: Semaphore) {
+        sem.release()
     }
 
 
     fun launchGL(s: String, ctx: Context, floorNum: Int, roomn: String) {
+
+        val sem = Semaphore(0)
+        nodes.clear()
+        connections.clear()
+        job = Job()
+        launch {
+            var pathGenerator = PathGenerator()
+            var updateUserLocation = UpdateUserLocation()
+            var allNodes = NodesStore.getNodes(ctx, s)
+            for (node in allNodes) {
+                node.print()
+            }
+            var entranceNode = allNodes[0]//updateUserLocation.getClosestEntrance()
+            var destinationNode = allNodes[allNodes.size - 1]
+            fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode, destinationNode)
+            for (i in 1 until fastestPath.size) {
+                connections.add(fastestPath[i].id as Int)
+                connections.add(fastestPath[i-1].id as Int)
+            }
+            sem.release()
+        }
 
         buildingName = s
         reqComplete = 0
@@ -135,21 +164,20 @@ class MapLauncher : AppCompatActivity() {
 
             getNodes(buildingName, floorNum, context = ctx, {
                 runOnUiThread {
-                    setComplete()
+                    setComplete(sem)
                 }
             })
             getMediaURL(buildingName, floorNum,  context =  ctx, {
                 runOnUiThread {
-                    setComplete()
+                    setComplete(sem)
                 }
             })
-            var complete = 0
-            while (complete != 2) {
-                synchronized(this) {
-                    complete = reqComplete
-                }
-            }
 
+
+
+            sem.acquire() // downs the semaphore
+            sem.acquire()
+            sem.acquire()
 
             var buildingNodes = ArrayList(nodes)
 
@@ -173,7 +201,6 @@ class MapLauncher : AppCompatActivity() {
             ctx.startActivity(intent)
         })
         th.start()
-
     }
 
 }
