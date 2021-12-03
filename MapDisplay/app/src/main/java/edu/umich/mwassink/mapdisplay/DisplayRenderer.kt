@@ -74,6 +74,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
     var PointMode: Boolean = false
     var MoveMode: Boolean = true
     var LineMode: Boolean = false
+    var floorNum: Int = -1
 
 
     init {
@@ -132,7 +133,8 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         heightPicture = (building.Texture.height).toFloat()
         widthPicture =  (building.Texture.width).toFloat()
         map = building.Texture
-        userPos = floatArrayOf(200f, 200f, -5f, 1f) // replace
+        userPos = floatArrayOf(building.Connections.Nodes[0], building.Connections.Nodes[1],
+                building.Connections.Nodes[2], building.Connections.Nodes[3]) // replace
         mapTextureHandle = -1
 
         pictureVertices = floatArrayOf(0f, heightPicture, defaultDepth, 1f, widthPicture, 0f, defaultDepth, 1f,
@@ -152,6 +154,8 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         for (i in 0 until building.Connections.Connections.size) {
             customLines.add(building.Connections.Connections[i])
         }
+
+        floorNum = building.floorNum
 
 
 
@@ -341,8 +345,10 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
 
         var orthoProj: Geometry.Matrix
         synchronized(this) {
-            orthoProj = geo.orthoProj(r, l, t, b, 100f, .5f)
+            orthoProj = geo.orthoProj(r, l, t, b, 10f, .5f)
             drawMap(orthoProj)
+            orthoProj = geo.orthoProj(r, l, t, b, 10000f * floorNum +5 ,
+                10000f * floorNum - 5)
             drawPoints(orthoProj)
 
         }

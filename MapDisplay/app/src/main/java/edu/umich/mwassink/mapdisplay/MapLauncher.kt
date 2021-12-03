@@ -67,6 +67,7 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
                         
                             nodes.add(((chattEntry[5]).toString()).toDouble()) // long
                             nodes.add(((chattEntry[6]).toString()).toDouble()) // latitude
+                            nodes.add(-10000 * chattEntry[4].toString().toDouble())
                             nCount++
                             /*if (neighbors != null) {
                                 for (j in 0 until neighbors.length()) {

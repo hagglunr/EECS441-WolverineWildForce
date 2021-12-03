@@ -31,12 +31,9 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.FileInputStream
-import kotlin.math.sqrt
 import java.util.*
-import kotlin.math.cos
-import kotlin.math.sin
 import com.travijuu.numberpicker.library.NumberPicker
-import kotlin.math.abs
+import kotlin.math.*
 
 // Uses some Code from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
 // In order to fuse sensors and get more accurate readings from them
@@ -105,6 +102,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     lateinit var navView: NavigateBinding
     private var currState: NavigationState = NavigationState.BROWSING
     var room: String = ""
+    var buildingName = ""
 
     enum class NavigationState {
         BROWSING, NAVIGATING, REPONSITIONING_B, REPONSITIONING_N, ARRIVE
@@ -121,7 +119,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         val fileName: String? = extras?.getString("buildingFile")
         val intarr = extras?.getIntegerArrayList("connections")
         val nodes: DoubleArray?= extras?.getDoubleArray("nodes")
-        val buildingName: String = extras?.getString("buildingName") as String
+        buildingName = extras?.getString("buildingName") as String
         room = extras?.getString("roomName") as String
         floorNum = extras?.getInt("floorNum")
         val inStream: FileInputStream = this.openFileInput(fileName)
@@ -310,6 +308,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
                         hideStart()
                         showRepositionDone()
                         showFloorSelector()
+
                         // same to turning on repos mode
                         view.setLineMode(false)
                         view.setPointMode(false)
@@ -331,6 +330,12 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
                         view.setPointMode(false)
                         view.setMoveMode(true)
                         view.setDragMode(false)
+                        if (navView.floorPicker.value != floorNum) {
+                            val launcher = MapLauncher()
+
+
+                            launcher.launchGL(buildingName, context, navView.floorPicker.value, room )
+                        }
                     }
                 }
             }
@@ -730,16 +735,16 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
                      x1f: Float, x2f: Float, y1f: Float, y2f: Float): FloatArray {
 
         var fArr: ArrayList<Float> = ArrayList()
-        for (i in 0 until f.size/2) {
-            val tdx = invLerp(x1, x2, f[i*2]) //long first
-            val tdy = invLerp(y1, y2, f[i*2+1])
+        for (i in 0 until f.size/3) {
+            val tdx = invLerp(x1, x2, f[i*3]) //long first
+            val tdy = invLerp(y1, y2, f[i*3+1])
             val txf = tdx.toFloat()
             val tyf = tdy.toFloat()
             val xf = lerp(x1f, x2f, txf)
             val yf = lerp(y1f, y2f, tyf)
             fArr.add(xf)
             fArr.add(yf)
-            fArr.add(-5f)
+            fArr.add(f[i*3 + 2].toFloat())
             fArr.add(1f)
 
         }
@@ -750,10 +755,10 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
     fun scaleDoubles(f: DoubleArray): FloatArray {
         var fArr: ArrayList<Float> = ArrayList()
-        for (i in 0 until f.size/2) {
-            fArr.add(f[i*2].toFloat())
-            fArr.add(f[i*2 + 1].toFloat())
-            fArr.add(-5f)
+        for (i in 0 until f.size/3) {
+            fArr.add(f[i*3].toFloat())
+            fArr.add(f[i*3 + 1].toFloat())
+            fArr.add(f[i*3 + 2].toFloat())
             fArr.add(1f)
         }
         return fArr.toFloatArray()
