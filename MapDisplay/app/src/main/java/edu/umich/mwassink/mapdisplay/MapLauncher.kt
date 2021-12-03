@@ -64,7 +64,7 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
                     val neighbors = if (chattEntry[7] == JSONObject.NULL) null else chattEntry[7] as JSONArray
                     if (chattEntry.length() == 8) {
 
-                        if (chattEntry[4].toString().toInt() == floorNum) {
+                        
                             nodes.add(((chattEntry[5]).toString()).toDouble()) // long
                             nodes.add(((chattEntry[6]).toString()).toDouble()) // latitude
                             nCount++
@@ -75,7 +75,7 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
                                     connections.add(flanders)
                                 }
                             }*/
-                        }
+
 
                     } else {
                         Toast.makeText(context, "Wrong length expected 8 got " + chattEntry.length().toString(),
@@ -147,7 +147,7 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
                 node.print()
             }
             var entranceNode = allNodes[0]//updateUserLocation.getClosestEntrance()
-            var destinationNode = allNodes[allNodes.size - 1]
+            var destinationNode = allNodes[allNodes.size/2 - 1]
             fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode, destinationNode)
             for (i in 1 until fastestPath.size) {
                 connections.add(fastestPath[i].id as Int)
