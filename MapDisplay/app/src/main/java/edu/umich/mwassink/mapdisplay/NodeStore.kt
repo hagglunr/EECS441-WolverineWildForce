@@ -11,6 +11,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.ArrayList
+import java.util.concurrent.Semaphore
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -18,7 +19,7 @@ object NodesStore {
     // private lateinit var queue: RequestQueue
     // var nodes = arrayListOf<Node>()
 
-    suspend fun getNodes(context: Context, building: String) = suspendCoroutine<ArrayList<Node>> { cont ->
+    fun getNodes(context: Context, building: String, s: Semaphore): ArrayList<Node> {
 //        nodes.clear()
         val queue = Volley.newRequestQueue(context)
         var nodes = arrayListOf<Node>()
@@ -80,7 +81,8 @@ object NodesStore {
                         )
                     )
                 }
-                cont.resume(nodes)
+                s.release()
+
             }, {
                 print("failed\n")
             }
@@ -90,5 +92,6 @@ object NodesStore {
 //            queue = Volley.newRequestQueue(context)
 //        }
         queue.add(getRequest)
+        return nodes
     }
 }

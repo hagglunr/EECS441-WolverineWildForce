@@ -42,6 +42,7 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
     @Volatile var reqComplete: Int = 0
     var buildingName = ""
     var floorURL = ""
+    var roomMap: MutableMap<String, Int> = mutableMapOf<String, Int>()
     fun getNodes(building: String, floorNum: Int,  context: Context, completion: () -> Unit) {
         val getRequest = JsonObjectRequest(serverUrl + "getnodes/?building=" + building,
             { response ->
@@ -68,6 +69,10 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
                             nodes.add(((chattEntry[5]).toString()).toDouble()) // long
                             nodes.add(((chattEntry[6]).toString()).toDouble()) // latitude
                             nodes.add(-10000 * chattEntry[4].toString().toDouble())
+                            roomMap[chattEntry[1].toString()] = chattEntry[2].toString().toInt()
+                            if (chattEntry[2].toString().toInt() == -1) {
+                                roomMap[chattEntry[1].toString()] = nCount
+                            }
                             nCount++
                             /*if (neighbors != null) {
                                 for (j in 0 until neighbors.length()) {
@@ -136,49 +141,57 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
 
     fun launchGL(s: String, ctx: Context, floorNum: Int, roomn: String) {
 
-        val sem = Semaphore(0)
+        val semPath = Semaphore(0)
+        val semMap = Semaphore(0)
+        val semNodes = Semaphore(0)
+        val semNodes2 = Semaphore(0)
         nodes.clear()
         connections.clear()
         job = Job()
-        launch {
+        val thpath: Thread = Thread(Runnable(){
+            semNodes.acquire()
             var pathGenerator = PathGenerator()
             var updateUserLocation = UpdateUserLocation()
-            var allNodes = NodesStore.getNodes(ctx, s)
+            var allNodes = NodesStore.getNodes(ctx, s, semNodes2)
             for (node in allNodes) {
                 node.print()
             }
+
+            semNodes2.acquire()
+            System.out.println(roomMap.toString())
             var entranceNode = allNodes[0]//updateUserLocation.getClosestEntrance()
-            var destinationNode = allNodes[allNodes.size/2 - 1]
+            var destinationNode = allNodes[roomMap[roomn] as Int]
             fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode, destinationNode)
             for (i in 1 until fastestPath.size) {
                 connections.add(fastestPath[i].id as Int)
                 connections.add(fastestPath[i-1].id as Int)
             }
-            sem.release()
-        }
+            semPath.release()
+        })
+        thpath.start()
+
 
         buildingName = s
-        reqComplete = 0
         //buildingName = s + 1.toString()
         val th: Thread = Thread(Runnable() {
             var intent: Intent =Intent(ctx, DisplayActivity::class.java)
 
             getNodes(buildingName, floorNum, context = ctx, {
                 runOnUiThread {
-                    setComplete(sem)
+                    setComplete(semNodes)
                 }
             })
             getMediaURL(buildingName, floorNum,  context =  ctx, {
                 runOnUiThread {
-                    setComplete(sem)
+                    setComplete(semMap)
                 }
             })
 
 
 
-            sem.acquire() // downs the semaphore
-            sem.acquire()
-            sem.acquire()
+            semPath.acquire() // downs the semaphore
+            semMap.acquire()
+
 
             var buildingNodes = ArrayList(nodes)
 

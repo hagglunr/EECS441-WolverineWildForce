@@ -12,7 +12,7 @@ import org.json.JSONObject
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class UpdateUserLocation : AppCompatActivity() {
+class UpdateUserLocation {
     private val serverURL = ""
     private val buildingName = ""
     private lateinit var queue: RequestQueue
