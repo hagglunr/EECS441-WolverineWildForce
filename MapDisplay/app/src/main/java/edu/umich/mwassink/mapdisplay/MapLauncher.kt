@@ -159,9 +159,13 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
 
             semNodes2.acquire()
             System.out.println(roomMap.toString())
-            var entranceNode = allNodes[0]//updateUserLocation.getClosestEntrance()
+            val user = User()
+            var entranceNode = updateUserLocation.getClosestEntrance(user, allNodes)
+            if (entranceNode == null) {
+                entranceNode = allNodes[0]
+            }
             var destinationNode = allNodes[roomMap[roomn] as Int]
-            fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode, destinationNode)
+            fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode as Node, destinationNode)
             for (i in 1 until fastestPath.size) {
                 connections.add(fastestPath[i].id as Int)
                 connections.add(fastestPath[i-1].id as Int)
