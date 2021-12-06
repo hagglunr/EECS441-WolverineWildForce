@@ -277,7 +277,10 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0)
 
         var buffCPUMemory = arrToBuffer(customPoints.toFloatArray(), 4 * customPoints.size)
-        var indexBuffer = arrToBufferInt(customLines.toIntArray(), 4 * customLines.size)
+        var copy: ArrayList<Int> = customLines.clone() as ArrayList<Int>
+        copy.removeAt(0)
+        copy.removeAt(0)
+        var indexBuffer = arrToBufferInt(copy.toIntArray(), 4 * customLines.size)
 
 
         // user
