@@ -75,6 +75,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
     var MoveMode: Boolean = true
     var LineMode: Boolean = false
     var floorNum: Int = -1
+    lateinit var rbuilding: Building
 
 
     init {
@@ -157,7 +158,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
 
         floorNum = building.floorNum
 
-
+        rbuilding = building
 
 
 
@@ -583,6 +584,33 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
             customLines.clear()
         }
     }
+
+    fun isFinished(): Boolean {
+        val xuser = userPos[0]
+        val yuser = userPos[1]
+        val end = rbuilding.Connections.Connections[rbuilding.Connections.Connections.size-2]
+        val xend = customPoints[end * 4]
+        val yend = customPoints[end * 4 + 1]
+        val dx = xend - xuser
+        val dy = yend - yuser
+        if (dx * dx + dy * dy  < 40f) {
+            return true
+        }
+        val dist = dx * dx + dy * dy
+        System.out.println("Dist from dest" + dist.toString() )
+        return false
+    }
+
+    fun distSquared(i1: Int, i2: Int): Float{
+        val x1 = customPoints[i1 * 4 ]
+        val y1 = customPoints[i1 * 4 + 1]
+        val x2 = customPoints[i2 * 4]
+        val y2 = customPoints[i2*4 + 1]
+        val dx = x1 - x2
+        val dy = y1 - y2
+        return dx*dx + dy*dy
+    }
+
 
 
 

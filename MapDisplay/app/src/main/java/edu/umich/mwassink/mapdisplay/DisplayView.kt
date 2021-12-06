@@ -9,18 +9,18 @@ import android.opengl.GLSurfaceView
 import android.opengl.GLUtils
 import android.text.InputType
 import android.util.Log
-import android.view.GestureDetector
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
-import android.widget.Toast
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONException
 import kotlin.math.sqrt
-import android.widget.EditText
 import android.content.DialogInterface
+import android.content.Intent
+import android.view.*
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import java.util.concurrent.Semaphore
 
 class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
     val renderer: DisplayRenderer
@@ -132,6 +132,7 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
                 renderer.SetPoint(cp, x, y)
             }
 
+
         } else if (renderer.PointMode) {
 
 
@@ -165,6 +166,8 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
         gestureDetector.onTouchEvent(ev)
         setZoom(scaleFactor)
         renderer.changeTrans(transRight, transUp)
+
+
         return true
     }
 
@@ -209,4 +212,6 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
     fun setDragMode(what: Boolean) {
         drag = what
     }
+
+
 }

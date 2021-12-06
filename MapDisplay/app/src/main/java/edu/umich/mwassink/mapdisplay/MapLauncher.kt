@@ -153,9 +153,6 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
             var pathGenerator = PathGenerator()
             var updateUserLocation = UpdateUserLocation()
             var allNodes = NodesStore.getNodes(ctx, s, semNodes2)
-            for (node in allNodes) {
-                node.print()
-            }
 
             semNodes2.acquire()
             System.out.println(roomMap.toString())
@@ -200,6 +197,8 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
             var buildingNodes = ArrayList(nodes)
 
             var conns = ArrayList(connections)
+
+
 
             var iStream = (URL(floorURL).content) as InputStream
             var img = BitmapFactory.decodeStream(iStream)

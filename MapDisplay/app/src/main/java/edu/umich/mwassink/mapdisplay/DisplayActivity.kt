@@ -3,6 +3,7 @@ package edu.umich.mwassink.mapdisplay
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -33,6 +34,8 @@ import org.json.JSONObject
 import java.io.FileInputStream
 import java.util.*
 import com.travijuu.numberpicker.library.NumberPicker
+import java.util.concurrent.Semaphore
+import kotlin.collections.ArrayList
 import kotlin.math.*
 
 // Uses some Code from Paul Lawitzki, https://www.codeproject.com/Articles/729759/Android-Sensor-Fusion-Tutorial
@@ -137,6 +140,8 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             flNodes = scaleDoubles(nodes as DoubleArray, -83.716537, 42.2926866,  -83.716103, 42.29279955,
                 29.318f, 549.536f, 37.166f, 204.9336f)
         }
+
+        negify(flNodes, intarr )
 
 
 
@@ -330,6 +335,9 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
                         view.setPointMode(false)
                         view.setMoveMode(true)
                         view.setDragMode(false)
+
+                        checkQuit()
+
                         if (navView.floorPicker.value != floorNum) {
                             val launcher = MapLauncher()
 
@@ -463,6 +471,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             val xDistance = newSteps * stepLength * worldDistanceXratio
             val yDistance = newSteps * stepLength * worldDistanceYratio
             view.changePos(xDistance, yDistance) // for now
+            checkQuit()
 
         }
     }
@@ -744,7 +753,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             val yf = lerp(y1f, y2f, tyf)
             fArr.add(xf)
             fArr.add(yf)
-            fArr.add(f[i*3 + 2].toFloat())
+            fArr.add(f[i*3 + 2].toFloat() * -1f)
             fArr.add(1f)
 
         }
@@ -758,10 +767,32 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         for (i in 0 until f.size/3) {
             fArr.add(f[i*3].toFloat())
             fArr.add(f[i*3 + 1].toFloat())
-            fArr.add(f[i*3 + 2].toFloat())
+            fArr.add(f[i*3 + 2].toFloat() * -1f)
             fArr.add(1f)
         }
         return fArr.toFloatArray()
+    }
+
+    fun makeNeg(f: Float): Float {
+        if ( f > 0) {
+            return f * -1
+        }
+        return f
+
+    }
+
+    fun negify(fArr: FloatArray, conns: ArrayList<Int>){
+        for (i in 0 until conns.size) {
+            val validNode = conns[i]
+            fArr[validNode * 4 + 2] = makeNeg(fArr[validNode * 4 + 2])
+        }
+    }
+
+    fun posify(fArr: FloatArray, conns: ArrayList<Int>){
+        for (i in 0 until conns.size) {
+            val validNode = conns[i]
+            fArr[validNode * 4 + 2] = abs(fArr[validNode * 4 + 2])
+        }
     }
 
     fun dist(points: FloatArray, i1: Int, i2: Int) : Float {
@@ -824,6 +855,32 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
     }
 
 
-    // Pull the nodes down from the server
+
+    fun checkQuit() {
+        if (view.renderer.isFinished()) {
+            val s = Semaphore(0)
+            val inflater: LayoutInflater = getSystemService(AppCompatActivity.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            val popupView = inflater.inflate(R.layout.arrival, null)
+
+            val popupWindow = PopupWindow(
+                popupView,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+
+            popupWindow.showAtLocation(
+                navView.floorPicker, // Location to display popup window
+                Gravity.CENTER, // Exact position of layout to display popup
+                0, // X offset
+                0 // Y offset
+            )
+
+            val returnButton = popupView.findViewById<Button>(R.id.returnButton)
+            returnButton.setOnClickListener{
+                onBackPressed()
+            }
+
+        }
+    }
 
 }
