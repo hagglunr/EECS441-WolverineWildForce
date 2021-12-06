@@ -319,6 +319,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
                         view.setPointMode(false)
                         view.setMoveMode(false)
                         view.setDragMode(true)
+
                     }
                     else {
                         when (currState) {
@@ -335,7 +336,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
                         view.setPointMode(false)
                         view.setMoveMode(true)
                         view.setDragMode(false)
-
+                        view.renderer.walkPast()
                         checkQuit()
 
                         if (navView.floorPicker.value != floorNum) {
@@ -472,6 +473,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             val yDistance = newSteps * stepLength * worldDistanceYratio
             view.changePos(xDistance, yDistance) // for now
             checkQuit()
+            view.renderer.walkPast()
 
         }
     }

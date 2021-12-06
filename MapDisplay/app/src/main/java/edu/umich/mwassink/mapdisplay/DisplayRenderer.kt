@@ -33,6 +33,7 @@ import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
+import kotlin.math.abs
 
 
 class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Renderer {
@@ -612,6 +613,15 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         val dx = x1 - x2
         val dy = y1 - y2
         return dx*dx + dy*dy
+    }
+
+    fun walkPast() {
+        for (i in 1 until customPoints.size / 4) {
+            if (distSquared(0, i) < 200f) {
+                customPoints[i*4 + 2] = abs(customPoints[i*4 + 2])
+            }
+            System.out.println("Dist from pt " + i.toString()   +  " " + distSquared(0, i).toString() )
+        }
     }
 
 
