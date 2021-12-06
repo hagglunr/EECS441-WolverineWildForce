@@ -279,8 +279,11 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
 
         var buffCPUMemory = arrToBuffer(customPoints.toFloatArray(), 4 * customPoints.size)
         var copy: ArrayList<Int> = customLines.clone() as ArrayList<Int>
-        copy.removeAt(0)
-        copy.removeAt(0)
+        if (copy.size > 1) {
+            copy.removeAt(0)
+            copy.removeAt(0)
+        }
+
         var indexBuffer = arrToBufferInt(copy.toIntArray(), 4 * customLines.size)
 
 

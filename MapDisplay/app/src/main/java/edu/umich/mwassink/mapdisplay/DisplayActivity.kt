@@ -131,7 +131,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         if (nodes == null || intarr == null) finish()
         val intArr = intarr as ArrayList<Int>
         numPoints = nodes?.size as Int
-        numPoints /= 2
+        numPoints /= 3
         var flNodes: FloatArray
         if (buildingName != "BBB" && buildingName != "GOOB") {
             flNodes = scaleDoubles(nodes as DoubleArray )
