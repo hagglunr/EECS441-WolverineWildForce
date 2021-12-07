@@ -78,4 +78,68 @@
 {"id":76,"coordinates":[-83.71620980048492,42.2927649640217],"type":"Room","neighbors":[60,77],"floor":"4","name":"Patio Door 1"},
 {"id":77,"coordinates":[-83.71631270391336,42.29276058208265],"type":"Room","neighbors":[61,76],"floor":"4","name":"Patio Door 2"},
 {"id":78,"coordinates":[-83.71622297834074,42.29310555987367],"type":"Path","neighbors":[66,67,70],"floor":"4","name":"Junction 9"}
-]}
+],
+
+"League_v4":[
+    {"id":1,"coordinates":[42.279310,-83.737845],"type":"Entrance","neighbors":[],"floor":"1","name":"Entrance 1"},
+    {"id":2,"coordinates":[42.278940,-83.737663],"type":"Entrance","neighbors":[],"floor":"1","name":"Entrance 2"},
+    {"id":3,"coordinates":[42.279694,-83.737703],"type":"Entrance","neighbors":[],"floor":"1","name":"Entrance 3"},
+    {"id":4,"coordinates":[42.279495,-83.737557],"type":"Entrance","neighbors":[],"floor":"1","name":"Entrance 4"},
+    {"id":5,"coordinates":[42.279322,-83.737552],"type":"Entrance","neighbors":[],"floor":"1","name":"Entrance 5"},
+    {
+        "building_name": "league_v4",
+        "name": "Entrance 1",
+        "id": 1,
+        "type": "Entrance",
+        "floor": "1",
+        "lat": 42.279310,
+        "long": -83.737845,
+        "neighbors": [
+        ]
+    },
+    {
+        "building_name": "league_v4",
+        "name": "Entrance 2",
+        "id": 2,
+        "type": "Entrance",
+        "floor": "1",
+        "lat": 42.278940,
+        "long": -83.737663,
+        "neighbors": [
+        ]
+    },
+    {
+        "building_name": "league_v4",
+        "name": "Entrance 3",
+        "id": 3,
+        "type": "Entrance",
+        "floor": "1",
+        "lat": 42.279694, 
+        "long": -83.737703,
+        "neighbors": [
+        ]
+    },
+    {
+        "building_name": "league_v4",
+        "name": "Entrance 4",
+        "id": 4,
+        "type": "Entrance",
+        "floor": "1",
+        "lat": 42.279495,
+        "long": -83.737557,
+        "neighbors": [
+        ]
+    },
+    {
+        "building_name": "league_v4",
+        "name": "Entrance 5",
+        "id": 5,
+        "type": "Entrance",
+        "floor": "1",
+        "lat": 42.279322,
+        "long": -83.737552,
+        "neighbors": [
+        ]
+    }
+]
+}
