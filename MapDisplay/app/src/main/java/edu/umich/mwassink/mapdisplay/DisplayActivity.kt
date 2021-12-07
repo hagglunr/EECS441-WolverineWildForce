@@ -788,6 +788,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             val validNode = conns[i]
             fArr[validNode * 4 + 2] = makeNeg(fArr[validNode * 4 + 2])
         }
+        //fArr[2] = makeNeg(fArr[2]) // user pos
     }
 
     fun posify(fArr: FloatArray, conns: ArrayList<Int>){

@@ -72,7 +72,7 @@ object NodesStore {
                     nodes.add(
                         Node(
                             name = name,
-                            id = i,
+                            id = nodeinfo[2].toString().toInt(),
                             floorNum = floorNum,
                             type = type,
                             latitude = latitude,
