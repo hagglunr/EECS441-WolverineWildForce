@@ -1,8 +1,4 @@
-{"League_v4":[
-    {"id":1,"coordinates":[42.279310,-83.737845],"type":"Entrance","neighbors":[],"floor":"1","name":"Entrance 1"},
-    {"id":2,"coordinates":[42.278940,-83.737663],"type":"Entrance","neighbors":[],"floor":"1","name":"Entrance 2"},
-    {"id":3,"coordinates":[42.279694,-83.737703],"type":"Entrance","neighbors":[],"floor":"1","name":"Entrance 3"},
-    {"id":4,"coordinates":[42.279495,-83.737557],"type":"Entrance","neighbors":[],"floor":"1","name":"Entrance 4"},
-    {"id":5,"coordinates":[42.279322,-83.737552],"type":"Entrance","neighbors":[],"floor":"1","name":"Entrance 5"}
+{"League_v5":[
+    {"id":13,"coordinates":[331.8546,388.5196],"type":"Room","neighbors":[11,13,14],"floor":"1","name":"Outside Theatre Entrance"}
 ]
 }

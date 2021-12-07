@@ -1,5 +1,6 @@
 package edu.umich.mwassink.mapdisplay
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,7 @@ import org.json.JSONObject
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+@SuppressLint("MissingPermission")
 class UpdateUserLocation {
     private val serverURL = ""
     private val buildingName = ""
