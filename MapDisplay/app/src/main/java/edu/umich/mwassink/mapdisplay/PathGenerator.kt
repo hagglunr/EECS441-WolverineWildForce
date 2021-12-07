@@ -126,7 +126,7 @@ class PathGenerator {
             currentNode = nodesList[parentList[currentNode.id as Int]]
         }
         path.add(entranceNode)
-        path.reverse()
+        //path.reverse()
 
         print("Length of fastest path: " + path.size + "\n")
         print("Order of Nodes:\n")

@@ -167,7 +167,8 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
                     destNode = allNodes[i]
                 }
             }
-            fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode as Node, destNode)
+            //fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode as Node, destNode)
+            fastestPath = pathGenerator.getFastestPath(s, allNodes, destNode, entranceNode)
             for (i in 1 until fastestPath.size) {
                 connections.add(fastestPath[i].id as Int)
                 connections.add(fastestPath[i-1].id as Int)
