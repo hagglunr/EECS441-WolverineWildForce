@@ -1,21 +1,21 @@
 package edu.umich.mwassink.mapdisplay
 
+import android.Manifest
+import android.app.Application
 import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
-import com.android.volley.RequestQueue
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.CancellationTokenSource
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class UpdateUserLocation {
-    private val serverURL = ""
-    private val buildingName = ""
-    private lateinit var queue: RequestQueue
+class UpdateUserLocation : Application() {
+//    private val serverURL = ""
+//    private val buildingName = ""
+//    private lateinit var queue: RequestQueue
 
 //    fun getEntrances(user : User, building: String, context: Context, completion: () -> Unit) {
 //        val getRequest = JsonObjectRequest(serverURL+"?buildingName="+buildingName,
@@ -52,7 +52,7 @@ class UpdateUserLocation {
 //    }
 
     // TODO: Later consider having default entrance in case of null or bad server request
-    fun getClosestEntrance(user : User, nodes: ArrayList<Node>): Node? {
+    fun getClosestEntrance(nodes: ArrayList<Node>, applicationContext : Context): Int {
         var shortestDistance = Double.MAX_VALUE
         var shortestIndex = Int.MAX_VALUE
         var entrances = ArrayList<Node>()
@@ -62,18 +62,50 @@ class UpdateUserLocation {
             }
         }
         if (entrances.isEmpty()) {
-            return null
+            return -1
         }
+
+        var userLat = 0.0
+        var userLon = 0.0
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return 0
+        }
+        LocationServices.getFusedLocationProviderClient(applicationContext)
+            .getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    userLat = it.result.latitude
+                    userLon = it.result.longitude
+                } else {
+                    Log.e("MainActivity getFusedLocation", it.exception.toString())
+                }
+            }
+
         for (i in 0 until entrances.size) {
-            val entranceLat = entrances[i]!!.latitude
-            val entranceLon = entrances[i]!!.longitude
+
+            val entranceLat = entrances[i].latitude
+            val entranceLon = entrances[i].longitude
             val distance =
-                sqrt((user.lat - entranceLat!!).pow(2) + (user.lon - entranceLon!!).pow(2))
+                sqrt((userLat - entranceLat!!).pow(2) + (userLon - entranceLon!!).pow(2))
             if (distance < shortestDistance) {
                 shortestDistance = distance
                 shortestIndex = i
             }
         }
-        return entrances[shortestIndex]
+        return shortestIndex
     }
 }

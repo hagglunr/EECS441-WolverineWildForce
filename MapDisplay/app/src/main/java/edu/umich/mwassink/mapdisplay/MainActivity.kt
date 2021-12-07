@@ -7,6 +7,8 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
+import android.Manifest
+import androidx.activity.result.contract.ActivityResultContracts
 import edu.umich.mwassink.mapdisplay.BuildingInfoStore.buildingRoomMap
 import edu.umich.mwassink.mapdisplay.BuildingInfoStore.getBuildings
 import edu.umich.mwassink.mapdisplay.databinding.ActivityMainBinding
@@ -26,6 +28,13 @@ class MainActivity : AppCompatActivity() {
         else {
             createSearchView()
         }
+
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (!granted) {
+                toast("Fine location access denied", false)
+                finish()
+            }
+        }.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
     private fun fetchBuildingInfo() {
