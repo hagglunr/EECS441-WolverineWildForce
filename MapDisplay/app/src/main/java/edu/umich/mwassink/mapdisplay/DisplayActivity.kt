@@ -133,7 +133,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         numPoints = nodes?.size as Int
         numPoints /= 3
         var flNodes: FloatArray
-        if (buildingName != "BBB" && buildingName != "GOOB") {
+        if (buildingName != "League_v4") {
             flNodes = scaleDoubles(nodes as DoubleArray )
         }
         else {
@@ -159,7 +159,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
 
         navView = NavigateBinding.inflate(layoutInflater)
-        addContentView(navView.root,
+        addContentView(buttonView.root,
             ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
 
 
