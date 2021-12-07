@@ -34,6 +34,7 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
         get() = job + Dispatchers.Main
     @Volatile var nodes =  arrayListOf<Double>()
     @Volatile var connections = arrayListOf<Int>()
+    var ids = arrayListOf<Int>()
     val serverUrl: String = "https://52.14.13.109/"
     lateinit var queue: RequestQueue
     lateinit var mostRecent: JSONArray
@@ -74,6 +75,7 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
                                 roomMap[chattEntry[1].toString()] = nCount
                             }
                             nCount++
+                            ids.add(chattEntry[2].toString().toInt())
                             /*if (neighbors != null) {
                                 for (j in 0 until neighbors.length()) {
                                     val flanders = neighbors[j].toString().toInt()
@@ -161,8 +163,14 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
             if (entranceNode == null) {
                 entranceNode = allNodes[0]
             }
-            var destinationNode = allNodes[roomMap[roomn] as Int]
-            fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode as Node, destinationNode)
+            var destinationID = roomMap[roomn]
+            var destNode = allNodes[0]
+            for (i in 0 until allNodes.size) {
+                if (allNodes[i].id == destinationID) {
+                    destNode = allNodes[i]
+                }
+            }
+            fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode as Node, destNode)
             for (i in 1 until fastestPath.size) {
                 connections.add(fastestPath[i].id as Int)
                 connections.add(fastestPath[i-1].id as Int)
@@ -197,15 +205,18 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
             var buildingNodes = ArrayList(nodes)
 
             var conns = ArrayList(connections)
+            var copyconns = ArrayList(buildingNodes)
 
-
+            for (i in 0 until ids.size) {
+                cpy(buildingNodes, copyconns, ids[i], i)
+            }
 
             var iStream = (URL(floorURL).content) as InputStream
             var img = BitmapFactory.decodeStream(iStream)
             var extras: Bundle = Bundle()
             extras.putIntegerArrayList("connections", conns)
             extras.putString("buildingFile", "bbb.png")
-            extras.putDoubleArray("nodes", buildingNodes.toDoubleArray() )
+            extras.putDoubleArray("nodes", copyconns.toDoubleArray() )
             extras.putString("buildingName", buildingName)
             extras.putInt("floorNum", floorNum)
             extras.putString("roomName", roomn)
@@ -218,6 +229,12 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
             ctx.startActivity(intent)
         })
         th.start()
+    }
+
+    fun cpy(src: ArrayList<Double>, dst: ArrayList<Double>, ind: Int, srcIndex: Int ) {
+        dst[ind*3+0] = src[srcIndex*3+0]
+        dst[ind*3+1] = src[srcIndex*3+1]
+        dst[ind*3+2] = src[srcIndex*3+2]
     }
 
 }

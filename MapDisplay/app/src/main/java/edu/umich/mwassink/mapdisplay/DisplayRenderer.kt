@@ -600,7 +600,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         val yend = customPoints[end * 4 + 1]
         val dx = xend - xuser
         val dy = yend - yuser
-        if (dx * dx + dy * dy  < 40f) {
+        if (dx * dx + dy * dy  < 200f) {
             return true
         }
         val dist = dx * dx + dy * dy
