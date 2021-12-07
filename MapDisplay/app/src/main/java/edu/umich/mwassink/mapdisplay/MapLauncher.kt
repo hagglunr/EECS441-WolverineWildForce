@@ -159,7 +159,7 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
             semNodes2.acquire()
             System.out.println(roomMap.toString())
             val user = User()
-            var entranceNode = allNodes[updateUserLocation.getClosestEntrance(allNodes, this)]
+            var entranceNode = allNodes[updateUserLocation.getClosestEntrance(allNodes, ctx)]
             var destinationID = roomMap[roomn]
             var destNode = allNodes[0]
             for (i in 0 until allNodes.size) {
