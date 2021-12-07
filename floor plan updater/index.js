@@ -18,9 +18,9 @@ function post_request(node) {
 function upload_bbb_nodes() {
     let rawdata = fs.readFileSync('BBBInternalNodes.json');
     let bbbnodes = JSON.parse(rawdata);
-    for (let i = 0; i < bbbnodes['League_v5'].length; i++) {
-        bbbnodes['League_v5'][i]['building_name'] = 'League_v5';
-        cur_node = bbbnodes['League_v5'][i];
+    for (let i = 0; i < bbbnodes['Michigan League'].length; i++) {
+        bbbnodes['Michigan League'][i]['building_name'] = 'Michigan League';
+        cur_node = bbbnodes['Michigan League'][i];
         console.log(cur_node)
         post_request(cur_node);
     }

@@ -60,7 +60,7 @@ class UpdateUserLocation {
         var entranceIndices = ArrayList<Int>()
         var i = 0
         for (node in nodes) {
-            if (node.type == NodeType.ENTRANCE) {
+            if (node.type == NodeType.ENTRANCE && node.id!! < 0) {
                 entrances.add(node)
                 entranceIndices.add(i)
             }

@@ -1,4 +1,4 @@
-{"League_v5":[
-    {"id":13,"coordinates":[331.8546,388.5196],"type":"Room","neighbors":[11,13,14],"floor":"1","name":"Outside Theatre Entrance"}
+{"Michigan League":[
+    {"id":0,"coordinates":[808.0348,200.12889],"type":"Entrance","neighbors":[0,1],"floor":"1","name":"Main Lobby"}
 ]
 }
