@@ -44,6 +44,7 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
 
     var lastX: Float = -1f
     var lastY: Float = -1f
+    var ctr = 0
 
     init {
         super.setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
@@ -157,7 +158,11 @@ class DisplayView (ctx: Context, building: Building) : GLSurfaceView(ctx) {
             bob.setNegativeButton("Cancel",
                 DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
 
-            bob.show()
+            ctr++
+            if (ctr % 2 == 1) {
+                bob.show()
+            }
+
 
         }
         println(java.lang.String.format("Event at (%f, %f)", x, y))

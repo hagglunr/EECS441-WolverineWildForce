@@ -159,7 +159,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
 
         navView = NavigateBinding.inflate(layoutInflater)
-        addContentView(navView.root,
+        addContentView(buttonView.root,
             ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
 
 
@@ -769,7 +769,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         for (i in 0 until f.size/3) {
             fArr.add(f[i*3].toFloat())
             fArr.add(f[i*3 + 1].toFloat())
-            fArr.add(f[i*3 + 2].toFloat() * -1f)
+            fArr.add(f[i*3 + 2].toFloat() )
             fArr.add(1f)
         }
         return fArr.toFloatArray()
@@ -831,6 +831,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
             System.out.print("\n")
             if (i >= numPoints) {
                 postPoint(i, buildingName, applicationContext, customPoints, flanders.toIntArray(), ptMap )
+                numPoints++
             }
 
         }
@@ -841,7 +842,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
         val jsonObj = mapOf(
             "building_name" to buildingName,
             "name" to ptMap[index],
-            "id" to -1,
+            "id" to index,
             "type" to "Room",
             "floor" to floorNum,
             "coordinates" to JSONArray(listOf(customPoints[index*4],  customPoints[index*4+1])),

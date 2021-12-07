@@ -7,62 +7,15 @@
     android:background="#D5CFCF"
     tools:context=".MainActivity">
 
-    <ImageView
-        android:id="@+id/logoView"
-        android:layout_width="314dp"
-        android:layout_height="77dp"
-        android:layout_marginTop="50dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/mguide_logo" />
-
-
-    <com.toptoche.searchablespinnerlibrary.SearchableSpinner
-        android:id="@+id/buildingSearchableSpinner"
-        android:layout_width="305dp"
-        android:layout_height="58dp"
-        android:layout_marginStart="204dp"
-        android:layout_marginTop="78dp"
-        android:layout_marginEnd="159dp"
-        android:layout_marginBottom="47dp"
-        app:layout_constraintBottom_toTopOf="@+id/roomsSearchableSpinner"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.603"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logoView" />
-
-    <com.toptoche.searchablespinnerlibrary.SearchableSpinner
-        android:id="@+id/roomsSearchableSpinner"
-        android:layout_width="305dp"
-        android:layout_height="58dp"
-        android:layout_marginStart="150dp"
-        android:layout_marginTop="47dp"
-        android:layout_marginEnd="148dp"
-        android:layout_marginBottom="60dp"
-        app:layout_constraintBottom_toTopOf="@+id/searchButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buildingSearchableSpinner" />
-
-    <Button
-        android:id="@+id/searchButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="80dp"
-        android:text="Search"
-        app:layout_constraintBottom_toTopOf="@+id/arriveButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/arriveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
-        android:text="Arrive"
+        android:layout_marginTop="40dp"
+        android:text="Start"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchButton" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

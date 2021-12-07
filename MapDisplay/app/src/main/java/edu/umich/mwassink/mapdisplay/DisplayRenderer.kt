@@ -135,8 +135,9 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         heightPicture = (building.Texture.height).toFloat()
         widthPicture =  (building.Texture.width).toFloat()
         map = building.Texture
-        userPos = floatArrayOf(building.Connections.Nodes[0], building.Connections.Nodes[1],
-                building.Connections.Nodes[2], building.Connections.Nodes[3]) // replace
+        //userPos = floatArrayOf(building.Connections.Nodes[0], building.Connections.Nodes[1],
+        //        building.Connections.Nodes[2], building.Connections.Nodes[3]) // replace
+        userPos = floatArrayOf(0f, 0f, -5f, 1f)
         mapTextureHandle = -1
 
         pictureVertices = floatArrayOf(0f, heightPicture, defaultDepth, 1f, widthPicture, 0f, defaultDepth, 1f,
@@ -298,8 +299,8 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
             GLES20.glEnableVertexAttribArray(0)
 
             // Relate user position to the red square. Userpos updates with sensor data
-            customPoints[0] = userPos[0]
-            customPoints[1] = userPos[1]
+            //customPoints[0] = userPos[0]
+            //customPoints[1] = userPos[1]
             GLES20.glDrawArrays(GLES20.GL_POINTS, 1, customPoints.size / 4)
             GLES20.glUniform1f(redLoc, 1f)
             GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1)
@@ -503,7 +504,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
 
             customPoints.add(lerp(l, r, tx))
             customPoints.add(lerp(t, b, ty))
-            customPoints.add(defaultDepth)
+            customPoints.add(floorNum * -10000f)
             customPoints.add(1f)
         }
     }

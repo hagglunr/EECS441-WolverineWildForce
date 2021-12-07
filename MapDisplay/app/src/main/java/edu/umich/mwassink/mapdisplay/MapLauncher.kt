@@ -150,6 +150,7 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
         nodes.clear()
         connections.clear()
         job = Job()
+        /*
         val thpath: Thread = Thread(Runnable(){
             semNodes.acquire()
             var pathGenerator = PathGenerator()
@@ -175,10 +176,10 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
             }
             semPath.release()
         })
-        thpath.start()
+        thpath.start() */
 
 
-        buildingName = s
+        buildingName = "Michigan League"
         //buildingName = s + 1.toString()
         val th: Thread = Thread(Runnable() {
             var intent: Intent =Intent(ctx, DisplayActivity::class.java)
@@ -196,7 +197,7 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
 
 
 
-            semPath.acquire() // downs the semaphore
+            semNodes.acquire() // downs the semaphore
             semMap.acquire()
 
 
