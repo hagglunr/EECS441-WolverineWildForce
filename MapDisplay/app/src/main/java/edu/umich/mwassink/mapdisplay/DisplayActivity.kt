@@ -159,7 +159,7 @@ class DisplayActivity: AppCompatActivity(), SensorEventListener {
 
 
         navView = NavigateBinding.inflate(layoutInflater)
-        addContentView(buttonView.root,
+        addContentView(navView.root,
             ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
 
 
