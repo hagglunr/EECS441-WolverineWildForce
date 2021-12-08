@@ -112,9 +112,21 @@ class UpdateUserLocation {
                 sqrt((userLat - entranceLat!!).pow(2) + (userLon - entranceLon!!).pow(2))
             if (distance < shortestDistance) {
                 shortestDistance = distance
-                shortestIndex = entranceIndices[i]
+                shortestIndex = entrances[i].id!!
             }
         }
-        return shortestIndex
+        if (shortestIndex == -100) {
+            shortestIndex = 0
+        } else {
+            shortestIndex *= -1
+        }
+        var index = -1
+        for (i in 0 until nodes.size) {
+            if (nodes[i].id == shortestIndex) {
+                index = i;
+                break;
+            }
+        }
+        return index
     }
 }
