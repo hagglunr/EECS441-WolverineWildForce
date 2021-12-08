@@ -77,6 +77,7 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
     var LineMode: Boolean = false
     var floorNum: Int = -1
     lateinit var rbuilding: Building
+    var beginEntrance: Int = -1
 
 
     init {
@@ -135,8 +136,9 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         heightPicture = (building.Texture.height).toFloat()
         widthPicture =  (building.Texture.width).toFloat()
         map = building.Texture
-        userPos = floatArrayOf(building.Connections.Nodes[0], building.Connections.Nodes[1],
-                building.Connections.Nodes[2], building.Connections.Nodes[3]) // replace
+
+
+        // replace
         mapTextureHandle = -1
 
         pictureVertices = floatArrayOf(0f, heightPicture, defaultDepth, 1f, widthPicture, 0f, defaultDepth, 1f,
@@ -158,6 +160,19 @@ class DisplayRenderer(v: GLSurfaceView, building: Building)  : GLSurfaceView.Ren
         }
 
         floorNum = building.floorNum
+        beginEntrance = customLines[1]
+
+        customPoints[0] = customPoints[beginEntrance*4]
+        customPoints[1] = customPoints[beginEntrance*4 + 1]
+        customPoints[2] = customPoints[beginEntrance*4 + 2]
+
+        customPoints[beginEntrance*4 + 2] = customPoints[beginEntrance*4 + 2]* -1
+
+        customLines[1] = 0
+        userPos = floatArrayOf(0f, 0f, -10000f*floorNum, 1f)
+        userPos[0] = customPoints[0]
+        userPos[1] = customPoints[1]
+
 
         rbuilding = building
 

@@ -123,6 +123,9 @@ class PathGenerator {
         while (!currentNode.isSameAs(entranceNode)) {
             path.add(currentNode)
             print("Added node " + currentNode.id + " to backtracking path\n")
+            if (nodesList[parentList[currentNode.id as Int]] == null) {
+
+            }
             currentNode = nodesList[parentList[currentNode.id as Int]]
         }
         path.add(entranceNode)

@@ -70,10 +70,9 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
                             nodes.add(((chattEntry[5]).toString()).toDouble()) // long
                             nodes.add(((chattEntry[6]).toString()).toDouble()) // latitude
                             nodes.add(-10000 * chattEntry[4].toString().toDouble())
+                        if (chattEntry[2].toString().toInt() >= 0) {
                             roomMap[chattEntry[1].toString()] = chattEntry[2].toString().toInt()
-                            if (chattEntry[2].toString().toInt() == -1) {
-                                roomMap[chattEntry[1].toString()] = nCount
-                            }
+                        }
                             nCount++
                             ids.add(chattEntry[2].toString().toInt())
                             /*if (neighbors != null) {
@@ -160,6 +159,17 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
             System.out.println(roomMap.toString())
             val user = User()
             var entranceNode = allNodes[updateUserLocation.getClosestEntrance(allNodes, ctx)]
+            if (entranceNode.id as Int <= -1) {
+                var wantedID = -1 * entranceNode.id as Int
+                for (i in 0 until allNodes.size) {
+                    if (allNodes[i].id as Int == wantedID) {
+                        entranceNode = allNodes[i]
+                    }
+                }
+            }
+
+
+
             var destinationID = roomMap[roomn]
             var destNode = allNodes[0]
             var navNodes = ArrayList<Node>()
@@ -210,7 +220,10 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
             var copyconns = ArrayList(buildingNodes)
 
             for (i in 0 until ids.size) {
-                cpy(buildingNodes, copyconns, ids[i], i)
+                if (ids[i] >= 0) {
+                    cpy(buildingNodes, copyconns, ids[i], i)
+                }
+
             }
 
             var iStream = (URL(floorURL).content) as InputStream
