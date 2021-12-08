@@ -39,8 +39,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun fetchBuildingInfo() {
         getBuildings(applicationContext) {
-            // Just for demonstrating the update of the room options when building change, remove after testing
-            buildingRoomMap["PIER"] = arrayListOf<String>("ENGR 101 Lab B505", "ENGR 101 Lab B507", "Barnes and Noble Bookstore", "Blue Market")
             createSearchView()
         }
     }
