@@ -162,13 +162,17 @@ class MapLauncher : AppCompatActivity(), CoroutineScope {
             var entranceNode = allNodes[updateUserLocation.getClosestEntrance(allNodes, ctx)]
             var destinationID = roomMap[roomn]
             var destNode = allNodes[0]
+            var navNodes = ArrayList<Node>()
             for (i in 0 until allNodes.size) {
                 if (allNodes[i].id == destinationID) {
                     destNode = allNodes[i]
                 }
+                if (allNodes[i].id as Int >= 0) {
+                    navNodes.add(allNodes[i])
+                }
             }
             //fastestPath = pathGenerator.getFastestPath(s, allNodes, entranceNode as Node, destNode)
-            fastestPath = pathGenerator.getFastestPath(s, allNodes, destNode, entranceNode)
+            fastestPath = pathGenerator.getFastestPath(s, navNodes, destNode, entranceNode)
             for (i in 1 until fastestPath.size) {
                 connections.add(fastestPath[i].id as Int)
                 connections.add(fastestPath[i-1].id as Int)
